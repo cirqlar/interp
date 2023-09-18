@@ -1,4 +1,4 @@
-use super::Token as T;
+use crate::Token as T;
 
 pub struct Lexer {
 	chars: Vec<char>,

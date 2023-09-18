@@ -1,7 +1,7 @@
 use std::io;
 use std::io::Write;
 
-use super::{lexer::Lexer, Token};
+use crate::{lexer::Lexer, Token};
 
 pub struct Repl();
 
