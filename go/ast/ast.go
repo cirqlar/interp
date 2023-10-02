@@ -1,9 +1,13 @@
 package ast
 
-import "interp/token"
+import (
+	"bytes"
+	"interp/token"
+)
 
 type Node interface {
 	TokenLiteral() string
+	String() string
 }
 
 type Statement interface {
@@ -27,6 +31,15 @@ func (p *Program) TokenLiteral() string {
 		return ""
 	}
 }
+func (p *Program) String() string {
+	var out bytes.Buffer
+
+	for _, stmnt := range p.Statements {
+		out.WriteString(stmnt.String())
+	}
+
+	return out.String()
+}
 
 type LetStatement struct {
 	Token token.Token
@@ -38,6 +51,61 @@ func (l *LetStatement) statmentNode() {}
 func (l *LetStatement) TokenLiteral() string {
 	return l.Token.Literal
 }
+func (l *LetStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(l.TokenLiteral() + " ")
+	out.WriteString(l.Name.String())
+	out.WriteString(" = ")
+
+	if l.Value != nil {
+		out.WriteString(l.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
+type ReturnStatement struct {
+	Token       token.Token
+	ReturnValue Expression
+}
+
+func (r *ReturnStatement) statmentNode() {}
+func (r *ReturnStatement) TokenLiteral() string {
+	return r.Token.Literal
+}
+func (r *ReturnStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(r.TokenLiteral() + " ")
+
+	if r.ReturnValue != nil {
+		out.WriteString(r.ReturnValue.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
+type ExpressionStatement struct {
+	Token      token.Token
+	Expression Expression
+}
+
+func (e *ExpressionStatement) statmentNode() {}
+func (e *ExpressionStatement) TokenLiteral() string {
+	return e.Token.Literal
+}
+func (e *ExpressionStatement) String() string {
+	if e.Expression != nil {
+		return e.Expression.String()
+	}
+
+	return ""
+}
 
 type Identifier struct {
 	Token token.Token
@@ -47,4 +115,7 @@ type Identifier struct {
 func (i *Identifier) expressionNode() {}
 func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
+}
+func (i *Identifier) String() string {
+	return i.Value
 }
