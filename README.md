@@ -1,1 +1,1 @@
-Writing an interpreter in Rust and Go by following [Interpreter in Go](https://interpreterbook.com/) by [Thorsten Ball](http://thorstenball.com/)
+Writing an interpreter in Rust and Go and C++ by following [Interpreter in Go](https://interpreterbook.com/) by [Thorsten Ball](http://thorstenball.com/)
