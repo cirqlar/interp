@@ -19,9 +19,9 @@ namespace interp::lexer
 		this->read_char();
 	}
 
-	interp::shared::Token Lexer::next_token()
+	interp::token::Token Lexer::next_token()
 	{
-		interp::shared::Token tok;
+		interp::token::Token tok;
 
 		this->skip_whitespace();
 
@@ -32,35 +32,35 @@ namespace interp::lexer
 			{
 				char ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::shared::EQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::EQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
 			}
 			else
 			{
-				tok = this->new_token(interp::shared::ASSIGN, this->ch);
+				tok = this->new_token(interp::token::ASSIGN, this->ch);
 			}
 			break;
 		case '+':
-			tok = this->new_token(interp::shared::PLUS, this->ch);
+			tok = this->new_token(interp::token::PLUS, this->ch);
 			break;
 		case '-':
-			tok = this->new_token(interp::shared::MINUS, this->ch);
+			tok = this->new_token(interp::token::MINUS, this->ch);
 			break;
 		case '*':
-			tok = this->new_token(interp::shared::ASTERISK, this->ch);
+			tok = this->new_token(interp::token::ASTERISK, this->ch);
 			break;
 		case '/':
-			tok = this->new_token(interp::shared::FORWARDSLASH, this->ch);
+			tok = this->new_token(interp::token::FORWARDSLASH, this->ch);
 			break;
 		case '!':
 			if (this->peek_char() == '=')
 			{
 				char ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::shared::NOTEQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::NOTEQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
 			}
 			else
 			{
-				tok = this->new_token(interp::shared::BANG, this->ch);
+				tok = this->new_token(interp::token::BANG, this->ch);
 			}
 			break;
 		case '<':
@@ -68,11 +68,11 @@ namespace interp::lexer
 			{
 				char ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::shared::LESSTHANOREQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::LESSTHANOREQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
 			}
 			else
 			{
-				tok = this->new_token(interp::shared::LESSTHAN, this->ch);
+				tok = this->new_token(interp::token::LESSTHAN, this->ch);
 			}
 			break;
 		case '>':
@@ -80,47 +80,47 @@ namespace interp::lexer
 			{
 				char ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::shared::GREATERTHANOREQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::GREATERTHANOREQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
 			}
 			else
 			{
-				tok = this->new_token(interp::shared::GREATERTHAN, this->ch);
+				tok = this->new_token(interp::token::GREATERTHAN, this->ch);
 			}
 			break;
 		case ',':
-			tok = this->new_token(interp::shared::COMMA, this->ch);
+			tok = this->new_token(interp::token::COMMA, this->ch);
 			break;
 		case ';':
-			tok = this->new_token(interp::shared::SEMICOLON, this->ch);
+			tok = this->new_token(interp::token::SEMICOLON, this->ch);
 			break;
 		case '(':
-			tok = this->new_token(interp::shared::LPAREN, this->ch);
+			tok = this->new_token(interp::token::LPAREN, this->ch);
 			break;
 		case ')':
-			tok = this->new_token(interp::shared::RPAREN, this->ch);
+			tok = this->new_token(interp::token::RPAREN, this->ch);
 			break;
 		case '{':
-			tok = this->new_token(interp::shared::LBRACE, this->ch);
+			tok = this->new_token(interp::token::LBRACE, this->ch);
 			break;
 		case '}':
-			tok = this->new_token(interp::shared::RBRACE, this->ch);
+			tok = this->new_token(interp::token::RBRACE, this->ch);
 			break;
 		case 0:
-			tok = {.type = interp::shared::L_EOF, .literal = ""};
+			tok = {.type = interp::token::L_EOF, .literal = ""};
 			break;
 		default:
 			if (isLetter(this->ch))
 			{
 				std::string literal = this->read_while(&isLetter);
-				return {.type = interp::shared::lookup_ident(literal), .literal = literal};
+				return {.type = interp::token::lookup_ident(literal), .literal = literal};
 			}
 			else if (isDigit(this->ch))
 			{
-				return {.type = interp::shared::INT, .literal = this->read_while(&isDigit)};
+				return {.type = interp::token::INT, .literal = this->read_while(&isDigit)};
 			}
 			else
 			{
-				return this->new_token(interp::shared::ILLEGAL, this->ch);
+				return this->new_token(interp::token::ILLEGAL, this->ch);
 			}
 			break;
 		}
@@ -174,7 +174,7 @@ namespace interp::lexer
 		return this->input.substr(position, this->position - position);
 	}
 
-	interp::shared::Token Lexer::new_token(interp::shared::TokenType Type, char ch)
+	interp::token::Token Lexer::new_token(interp::token::TokenType Type, char ch)
 	{
 		return {.type = Type, .literal = std::string(1, ch)};
 	}

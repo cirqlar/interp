@@ -1,0 +1,101 @@
+#include "ast.h"
+
+namespace interp::ast
+{
+	Program::Program(std::vector<std::shared_ptr<Statement>> statements) : statements(statements)
+	{
+	}
+
+	std::string Program::token_literal()
+	{
+		if (this->statements.size() > 0)
+		{
+			return this->statements.at(0)->token_literal();
+		}
+		else
+		{
+			return "";
+		}
+	}
+
+	std::string Program::string()
+	{
+		std::string out;
+		for (auto stmnt : this->statements)
+		{
+			out += stmnt->string();
+		}
+
+		return out;
+	}
+
+	Identifier::Identifier(interp::token::Token token, std::string value) : token(token), value(value)
+	{
+	}
+
+	std::string Identifier::token_literal()
+	{
+		return this->token.literal;
+	}
+
+	std::string Identifier::string()
+	{
+		return this->value;
+	}
+
+	LetStatment::LetStatment(interp::token::Token token, Identifier name, std::shared_ptr<Expression> value)
+		: token(token), name(name), value(value)
+	{
+	}
+
+	std::string LetStatment::token_literal()
+	{
+		return this->token.literal;
+	}
+
+	std::string LetStatment::string()
+	{
+		std::string out = this->token_literal() + " " + this->name.string() + " = ";
+
+		if (this->value)
+		{
+			out += this->value->string();
+		}
+
+		out += ";";
+		return out;
+	}
+
+	std::string ReturnStatment::token_literal()
+	{
+		return this->token.literal;
+	}
+
+	std::string ReturnStatment::string()
+	{
+		std::string out = this->token_literal() + " ";
+		if (this->return_value)
+		{
+			out += this->return_value->string();
+		}
+		out += ";";
+		return out;
+	}
+
+	std::string ExpressionStatement::token_literal()
+	{
+		return this->token.literal;
+	}
+
+	std::string ExpressionStatement::string()
+	{
+		if (this->expression)
+		{
+			return this->expression->string();
+		}
+		else
+		{
+			return "";
+		}
+	}
+}

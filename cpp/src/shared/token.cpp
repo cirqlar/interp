@@ -1,6 +1,6 @@
 #include "token.h"
 
-namespace interp::shared {
+namespace interp::token {
 	std::map<std::string, TokenType> keywords({
 		std::pair("fn", FUNCTION),
 		std::pair("let", LET),

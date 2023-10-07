@@ -4,7 +4,7 @@
 #include <iostream>
 #include <map>
 
-namespace interp::shared
+namespace interp::token
 {
 	typedef std::string TokenType;
 

@@ -13,10 +13,10 @@ let result = add(five, ten);
 	)";
 
 	interp::lexer::Lexer lex(input);
-	interp::shared::Token tok;
+	interp::token::Token tok;
 
 	do {
 		tok = lex.next_token();
 		std::cout << "Token {.type = " << tok.type << ", .literal = " << tok.literal << "}\n";
-	} while (tok.type != interp::shared::L_EOF && tok.type != interp::shared::ILLEGAL);
+	} while (tok.type != interp::token::L_EOF && tok.type != interp::token::ILLEGAL);
 }

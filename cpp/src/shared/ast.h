@@ -1,0 +1,91 @@
+#ifndef INTERP_SHARED_AST_H
+#define INTERP_SHARED_AST_H
+
+#include <iostream>
+#include <vector>
+#include <memory>
+
+#include "shared/token.h"
+
+namespace interp::ast
+{
+	class Node
+	{
+	public:
+		virtual std::string token_literal() = 0;
+		virtual std::string string() = 0;
+	};
+
+	class Statement : public Node
+	{
+	};
+
+	class Expression : public Node
+	{
+	};
+
+
+	class Program: public Node
+	{
+	public:
+		Program(std::vector<std::shared_ptr<Statement>> statements);
+		~Program() = default;
+
+		std::vector<std::shared_ptr<Statement>> statements;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	class Identifier: public Expression
+	{
+	public:
+		Identifier(interp::token::Token token, std::string value);
+		~Identifier() = default;
+
+		interp::token::Token token;
+		std::string value;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	class LetStatment: public Statement
+	{
+	public:
+		LetStatment(interp::token::Token token, Identifier name, std::shared_ptr<Expression> value);
+		~LetStatment() = default;
+
+		interp::token::Token token;
+		Identifier name;
+		std::shared_ptr<Expression> value;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	class ReturnStatment: public Statement
+	{
+	public:
+		interp::token::Token token;
+		std::unique_ptr<Expression> return_value;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	class ExpressionStatement: public Statement
+	{
+	public:
+		interp::token::Token token;
+		std::unique_ptr<Expression> expression;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	
+
+}
+
+#endif
