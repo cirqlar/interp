@@ -50,11 +50,11 @@ namespace interp::ast
 		std::string string() override;
 	};
 
-	class LetStatment: public Statement
+	class LetStatement: public Statement
 	{
 	public:
-		LetStatment(interp::token::Token token, Identifier name, std::shared_ptr<Expression> value);
-		~LetStatment() = default;
+		LetStatement(interp::token::Token token, Identifier name, std::shared_ptr<Expression> value);
+		~LetStatement() = default;
 
 		interp::token::Token token;
 		Identifier name;
@@ -64,7 +64,7 @@ namespace interp::ast
 		std::string string() override;
 	};
 
-	class ReturnStatment: public Statement
+	class ReturnStatement: public Statement
 	{
 	public:
 		interp::token::Token token;

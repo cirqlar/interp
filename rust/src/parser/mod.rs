@@ -125,7 +125,7 @@ mod tests {
     use crate::shared::tokens::Token;
 
     #[test]
-    fn test_let_statments() {
+    fn test_let_statements() {
         let input = "
 			let x = 5;
 			let y = 10;
@@ -141,7 +141,7 @@ mod tests {
         assert_eq!(
             prog.statements.len(),
             3,
-            "Program not three statments long. got={}",
+            "Program not three statements long. got={}",
             prog.statements.len()
         );
 
@@ -153,7 +153,7 @@ mod tests {
     }
 
     #[test]
-    fn test_return_statments() {
+    fn test_return_statements() {
         let input = "
 			return 5;
 			return 10;
@@ -169,7 +169,7 @@ mod tests {
         assert_eq!(
             prog.statements.len(),
             3,
-            "Program not three statments long. got={}",
+            "Program not three statements long. got={}",
             prog.statements.len()
         );
 

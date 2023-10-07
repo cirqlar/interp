@@ -12,7 +12,7 @@ type Node interface {
 
 type Statement interface {
 	Node
-	statmentNode()
+	statementNode()
 }
 
 type Expression interface {
@@ -47,7 +47,7 @@ type LetStatement struct {
 	Value Expression
 }
 
-func (l *LetStatement) statmentNode() {}
+func (l *LetStatement) statementNode() {}
 func (l *LetStatement) TokenLiteral() string {
 	return l.Token.Literal
 }
@@ -72,7 +72,7 @@ type ReturnStatement struct {
 	ReturnValue Expression
 }
 
-func (r *ReturnStatement) statmentNode() {}
+func (r *ReturnStatement) statementNode() {}
 func (r *ReturnStatement) TokenLiteral() string {
 	return r.Token.Literal
 }
@@ -95,7 +95,7 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
-func (e *ExpressionStatement) statmentNode() {}
+func (e *ExpressionStatement) statementNode() {}
 func (e *ExpressionStatement) TokenLiteral() string {
 	return e.Token.Literal
 }

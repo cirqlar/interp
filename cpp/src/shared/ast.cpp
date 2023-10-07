@@ -43,17 +43,17 @@ namespace interp::ast
 		return this->value;
 	}
 
-	LetStatment::LetStatment(interp::token::Token token, Identifier name, std::shared_ptr<Expression> value)
+	LetStatement::LetStatement(interp::token::Token token, Identifier name, std::shared_ptr<Expression> value)
 		: token(token), name(name), value(value)
 	{
 	}
 
-	std::string LetStatment::token_literal()
+	std::string LetStatement::token_literal()
 	{
 		return this->token.literal;
 	}
 
-	std::string LetStatment::string()
+	std::string LetStatement::string()
 	{
 		std::string out = this->token_literal() + " " + this->name.string() + " = ";
 
@@ -66,12 +66,12 @@ namespace interp::ast
 		return out;
 	}
 
-	std::string ReturnStatment::token_literal()
+	std::string ReturnStatement::token_literal()
 	{
 		return this->token.literal;
 	}
 
-	std::string ReturnStatment::string()
+	std::string ReturnStatement::string()
 	{
 		std::string out = this->token_literal() + " ";
 		if (this->return_value)

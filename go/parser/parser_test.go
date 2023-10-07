@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestLetStatments(t *testing.T) {
+func TestLetStatements(t *testing.T) {
 	input := `
 let x = 5;
 let y = 10;
@@ -35,13 +35,13 @@ let foobar = 838383;
 
 	for i, tt := range tests {
 		stmnt := program.Statements[i]
-		if !testLetStatment(t, stmnt, tt.expectedIdentifier) {
+		if !testLetStatement(t, stmnt, tt.expectedIdentifier) {
 			return
 		}
 	}
 }
 
-func TestReturnStatments(t *testing.T) {
+func TestReturnStatements(t *testing.T) {
 	input := `
 return 5;
 return 10;
@@ -64,7 +64,7 @@ return 838383;
 	for _, stmnt := range prog.Statements {
 		r, ok := stmnt.(*ast.ReturnStatement)
 		if !ok {
-			t.Errorf("Statment isn't *ast.ReturnStatement, got=%T", stmnt)
+			t.Errorf("Statement isn't *ast.ReturnStatement, got=%T", stmnt)
 			continue
 		}
 		if r.TokenLiteral() != "return" {
@@ -74,7 +74,7 @@ return 838383;
 	}
 }
 
-func testLetStatment(t *testing.T, s ast.Statement, name string) bool {
+func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("s.TokenLiteral not 'let'. got=%q", s.TokenLiteral())
 		return false

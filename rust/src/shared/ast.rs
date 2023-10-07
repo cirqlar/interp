@@ -75,7 +75,7 @@ impl Statement {
 
     fn return_string(&self) -> String {
         let S::Return { value, .. } = self else {
-            panic!("Called return_string with non Return Statment");
+            panic!("Called return_string with non Return Statement");
         };
 
         let mut out = String::from("return ");
@@ -89,7 +89,7 @@ impl Statement {
 
     fn expression_string(&self) -> String {
         let S::Expression { value, .. } = self else {
-            panic!("Called expression_string with non Expression Statment");
+            panic!("Called expression_string with non Expression Statement");
         };
 
         value.string()
