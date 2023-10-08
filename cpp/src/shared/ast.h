@@ -29,6 +29,7 @@ namespace interp::ast
 	{
 	public:
 		Program(std::vector<std::shared_ptr<Statement>> statements);
+		Program() = default;
 		~Program() = default;
 
 		std::vector<std::shared_ptr<Statement>> statements;
@@ -67,8 +68,11 @@ namespace interp::ast
 	class ReturnStatement: public Statement
 	{
 	public:
+		ReturnStatement(interp::token::Token token, std::shared_ptr<Expression> return_value);
+		~ReturnStatement() = default;
+
 		interp::token::Token token;
-		std::unique_ptr<Expression> return_value;
+		std::shared_ptr<Expression> return_value;
 
 		std::string token_literal() override;
 		std::string string() override;

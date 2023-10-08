@@ -13,9 +13,8 @@ bool isDigit(char ch)
 namespace interp::lexer
 {
 
-	Lexer::Lexer(std::string input)
+	Lexer::Lexer(std::string input) : input(input), position(0), read_position(0)
 	{
-		this->input = input;
 		this->read_char();
 	}
 

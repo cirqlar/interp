@@ -39,7 +39,17 @@ target_link_libraries(
   GTest::gtest_main interp_compiler_flags
 )
 
+add_executable(
+  parser_test
+  src/parser/parser_test.cpp src/parser/parser.cpp src/shared/token.cpp src/lexer/lexer.cpp src/shared/ast.cpp
+)
+target_link_libraries(
+  parser_test
+  GTest::gtest_main interp_compiler_flags
+)
+
 include(GoogleTest)
 gtest_discover_tests(lexer_test)
 gtest_discover_tests(ast_test)
+gtest_discover_tests(parser_test)
 

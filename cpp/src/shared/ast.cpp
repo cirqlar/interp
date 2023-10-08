@@ -66,6 +66,11 @@ namespace interp::ast
 		return out;
 	}
 
+	ReturnStatement::ReturnStatement(interp::token::Token token, std::shared_ptr<Expression> return_value)
+		: token(token), return_value(return_value)
+	{
+	}
+
 	std::string ReturnStatement::token_literal()
 	{
 		return this->token.literal;

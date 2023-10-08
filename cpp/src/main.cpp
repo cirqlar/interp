@@ -1,6 +1,7 @@
 #include <iostream>
 #include "shared/token.h"
 #include "lexer/lexer.h"
+#include "parser/parser.h"
 
 int main()
 {
@@ -19,4 +20,16 @@ let result = add(five, ten);
 		tok = lex.next_token();
 		std::cout << "Token {.type = " << tok.type << ", .literal = " << tok.literal << "}\n";
 	} while (tok.type != interp::token::L_EOF && tok.type != interp::token::ILLEGAL);
+
+	std::string input2 = R"(
+return 5;
+return 10;
+return 838383;
+	)";
+
+	interp::lexer::Lexer lex2(input2);
+	interp::parser::Parser parse(lex2);
+
+	auto prog = parse.parse_program();
+	std::cout << prog->statements.size();
 }
