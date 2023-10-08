@@ -1,5 +1,4 @@
-#ifndef INTERP_LEXER_H
-#define INTERP_LEXER_H
+#pragma once
 
 #include <iostream>
 #include "shared/token.h"
@@ -26,5 +25,3 @@ namespace interp::lexer
 		interp::token::Token new_token(interp::token::TokenType Type, char ch);
 	};
 }
-
-#endif

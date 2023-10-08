@@ -1,5 +1,4 @@
-#ifndef INTERP_PARSER_H
-#define INTERP_PARSER_H
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -36,5 +35,3 @@ namespace interp::parser
 		void peek_error(interp::token::TokenType type);
 	};
 }
-
-#endif

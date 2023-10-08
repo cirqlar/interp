@@ -1,5 +1,4 @@
-#ifndef INTERP_SHARED_TOKEN_H
-#define INTERP_SHARED_TOKEN_H
+#pragma once
 
 #include <iostream>
 #include <map>
@@ -56,5 +55,3 @@ namespace interp::token
 
 	std::string lookup_ident(std::string literal);
 }
-
-#endif

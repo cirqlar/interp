@@ -1,5 +1,4 @@
-#ifndef INTERP_SHARED_AST_H
-#define INTERP_SHARED_AST_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -91,5 +90,3 @@ namespace interp::ast
 	
 
 }
-
-#endif

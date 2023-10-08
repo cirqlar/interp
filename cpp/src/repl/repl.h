@@ -1,9 +1,6 @@
-#ifndef INTERP_REPL_H
-#define INTERP_REPL_H
+#pragma once
 
 namespace interp::repl
 {
 	void start();
 }
-
-#endif
