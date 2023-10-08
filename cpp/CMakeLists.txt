@@ -9,7 +9,7 @@ target_include_directories(interp_compiler_flags INTERFACE "${PROJECT_SOURCE_DIR
 
 add_executable(
   interp
-  src/main.cpp src/lexer/lexer.cpp src/shared/token.cpp src/shared/ast.cpp src/parser/parser.cpp
+  src/main.cpp src/lexer/lexer.cpp src/shared/token.cpp src/shared/ast.cpp src/parser/parser.cpp src/repl/repl.cpp
 )
 target_link_libraries(interp PUBLIC interp_compiler_flags)
 
