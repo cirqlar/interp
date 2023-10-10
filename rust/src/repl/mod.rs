@@ -21,9 +21,9 @@ impl Repl {
             };
             let mut lex = Lexer::new(&input);
 
-            let mut tok = Token::Dot;
+            let mut tok = lex.next_token();
 
-            while tok != Token::EOF && tok != Token::Illegal {
+            while tok != Token::EOF && tok != Token::ILLEGAL {
                 tok = lex.next_token();
                 println!("T::{:?}", tok);
             }

@@ -1,27 +1,56 @@
+use std::collections::HashMap;
+
 use crate::{
     lexer::Lexer,
-    shared::ast::{Identifier, Program, Statement},
-    Token,
+    shared::ast::{Expression, Identifier, IntegerLiteral, PrefixExpression, Program, Statement},
+    Token, TokenType,
 };
+
+enum Precidence {
+    Lowest,
+    Equals,      // ==
+    Lessgreater, // > or < or <= or >=
+    Sum,         // +
+    Product,     // *
+    Prefix,      // -X or !X
+    Call,        // myFunction(X)
+}
+
+type PrefixParseFn = fn(&mut Parser) -> Result<Expression, String>;
+type InfixParseFn = fn(&Expression) -> Result<Expression, String>;
 
 pub struct Parser {
     l: Lexer,
     current_token: Token,
     peek_token: Token,
     pub errors: Vec<String>,
+
+    prefix_parse_fns: HashMap<TokenType, PrefixParseFn>,
+    infix_parse_fns: HashMap<TokenType, InfixParseFn>,
 }
 
 impl Parser {
     pub fn new(l: Lexer) -> Parser {
         let mut p = Parser {
             l,
-            current_token: Token::Illegal,
-            peek_token: Token::Illegal,
+            current_token: Token::ILLEGAL.clone(),
+            peek_token: Token::ILLEGAL.clone(),
             errors: Vec::new(),
+            prefix_parse_fns: HashMap::new(),
+            infix_parse_fns: HashMap::new(),
         };
 
         p.next_token();
         p.next_token();
+
+        p.prefix_parse_fns
+            .insert(TokenType::Identifier, Parser::parse_identifier);
+        p.prefix_parse_fns
+            .insert(TokenType::Integer, Parser::parse_integer_literal);
+        p.prefix_parse_fns
+            .insert(TokenType::Bang, Parser::parse_prefix_expression);
+        p.prefix_parse_fns
+            .insert(TokenType::Minus, Parser::parse_prefix_expression);
 
         p
     }
@@ -45,36 +74,27 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> Result<Statement, String> {
-        match self.current_token {
-            Token::Let => self.parse_let_statement(),
-            Token::Return => self.parse_return_statement(),
-            _ => Err("Not handled".into()),
+        match self.current_token.token_type {
+            TokenType::Let => self.parse_let_statement(),
+            TokenType::Return => self.parse_return_statement(),
+            _ => self.parse_expression_statment(),
         }
     }
 
     fn parse_let_statement(&mut self) -> Result<Statement, String> {
-        let current_token = std::mem::replace(&mut self.current_token, Token::Illegal);
+        let current_token = std::mem::replace(&mut self.current_token, Token::ILLEGAL.clone());
 
-        let peek_token = std::mem::replace(&mut self.peek_token, Token::Illegal);
-        let name = match peek_token {
-            Token::Identifier(ref name) => {
-                self.next_token();
-                Ok::<_, String>(name.clone())
-            }
-            _ => return Err(format!("Expected identifier got {:?}", peek_token)),
-        }?;
+        // let peek_token = ;
+        self.expect_peek(&TokenType::Identifier)?;
 
         let name = Identifier {
-            token: peek_token,
-            value: name,
+            token: std::mem::replace(&mut self.current_token, Token::ILLEGAL.clone()),
         };
 
-        if !self.expect_peek(Token::Assign) {
-            return Err(format!("Expected = got {:?}", self.peek_token));
-        }
+        self.expect_peek(&TokenType::Assign)?;
 
         // Skip till next semicolon
-        while !self.current_token_is(Token::Semicolon) {
+        while !self.current_token_is(&TokenType::Semicolon) {
             self.next_token();
         }
 
@@ -87,33 +107,91 @@ impl Parser {
 
     fn parse_return_statement(&mut self) -> Result<Statement, String> {
         let stmnt = Statement::Return {
-            token: std::mem::replace(&mut self.current_token, Token::Illegal),
+            token: std::mem::replace(&mut self.current_token, Token::ILLEGAL.clone()),
             value: None,
         };
         self.next_token();
 
         // Skip till next semicolon
-        while !self.current_token_is(Token::Semicolon) {
+        while !self.current_token_is(&TokenType::Semicolon) {
             self.next_token();
         }
 
         Ok(stmnt)
     }
 
-    fn current_token_is(&self, t: Token) -> bool {
-        self.current_token == t
+    fn parse_expression_statment(&mut self) -> Result<Statement, String> {
+        let token = self.current_token.clone();
+
+        let value = self.parse_expression(Precidence::Lowest)?;
+
+        if self.peek_token_is(&TokenType::Semicolon) {
+            self.next_token()
+        }
+
+        Ok(Statement::Expression { token, value })
     }
 
-    fn peek_token_is(&self, t: Token) -> bool {
-        self.peek_token == t
+    fn parse_expression(&mut self, precidence: Precidence) -> Result<Expression, String> {
+        let prefix = self
+            .prefix_parse_fns
+            .get(&self.current_token.token_type)
+            .ok_or(format!(
+                "No prefix found for {:?}",
+                self.current_token.token_type
+            ))?;
+
+        prefix(self)
     }
 
-    fn expect_peek(&mut self, t: Token) -> bool {
+    fn parse_identifier(&mut self) -> Result<Expression, String> {
+        Ok(Identifier {
+            token: std::mem::replace(&mut self.current_token, Token::ILLEGAL.clone()),
+        }
+        .into())
+    }
+
+    fn parse_integer_literal(&mut self) -> Result<Expression, String> {
+        let token = std::mem::replace(&mut self.current_token, Token::ILLEGAL.clone());
+        let value: i64 = token
+            .literal
+            .as_ref()
+            .ok_or("empty integer")?
+            .parse()
+            .map_err(|_| String::from("invalid integer"))?;
+
+        Ok(IntegerLiteral { token, value }.into())
+    }
+
+    fn parse_prefix_expression(&mut self) -> Result<Expression, String> {
+        let token = std::mem::replace(&mut self.current_token, Token::ILLEGAL.clone());
+        self.next_token();
+        let right = self.parse_expression(Precidence::Prefix)?;
+
+        Ok(PrefixExpression {
+            token,
+            right: Box::from(right),
+        }
+        .into())
+    }
+
+    fn current_token_is(&self, t: &TokenType) -> bool {
+        self.current_token.token_type == *t
+    }
+
+    fn peek_token_is(&self, t: &TokenType) -> bool {
+        self.peek_token.token_type == *t
+    }
+
+    fn expect_peek(&mut self, t: &TokenType) -> Result<(), String> {
         if self.peek_token_is(t) {
             self.next_token();
-            true
+            Ok(())
         } else {
-            false
+            Err(format!(
+                "Expected {:?} = got {:?}",
+                t, self.peek_token.token_type
+            ))
         }
     }
 }
@@ -121,7 +199,7 @@ impl Parser {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::shared::ast::{Node, Statement};
+    use crate::shared::ast::{Expression, Node, Statement};
     use crate::shared::tokens::Token;
 
     #[test]
@@ -186,6 +264,106 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_identifier_expression() {
+        let input = "foobar;";
+
+        let lex = Lexer::new(input);
+        let mut parse = Parser::new(lex);
+
+        let prog = parse.parse_program();
+        check_errors(&parse);
+
+        assert_eq!(
+            prog.statements.len(),
+            1,
+            "Program not one statement long. got={}",
+            prog.statements.len()
+        );
+
+        let Statement::Expression { ref value, .. } = prog.statements[0] else {
+            panic!("Not Expression. got {:?}", prog.statements[0]);
+        };
+
+        let Expression::Identifier(Identifier { token }) = value else {
+            panic!("Not Identifier. got {:?}", value);
+        };
+
+        assert_eq!(token.token_type, TokenType::Identifier);
+        assert_eq!(token.literal, Some("foobar".into()));
+    }
+
+    #[test]
+    fn test_integer_literal() {
+        let input = "5;";
+
+        let lex = Lexer::new(input);
+        let mut parse = Parser::new(lex);
+
+        let prog = parse.parse_program();
+        check_errors(&parse);
+
+        assert_eq!(
+            prog.statements.len(),
+            1,
+            "Program not one statement long. got={}",
+            prog.statements.len()
+        );
+
+        let Statement::Expression { ref value, .. } = prog.statements[0] else {
+            panic!("Not Expression. got {:?}", prog.statements[0]);
+        };
+
+        let Expression::IntegerLiteral(IntegerLiteral { token, value }) = value else {
+            panic!("Not IntegerLiteral. got {:?}", value);
+        };
+
+        assert_eq!(token.token_type, TokenType::Integer);
+        assert_eq!(token.literal, Some("5".into()));
+        assert_eq!(*value, 5);
+    }
+
+    #[test]
+    fn test_prefix_expression() {
+        let inputs = [("!5;", TokenType::Bang, 5), ("-15;", TokenType::Minus, 15)];
+
+        for (input, token_type, expected) in inputs {
+            let lex = Lexer::new(input);
+            let mut parse = Parser::new(lex);
+
+            let prog = parse.parse_program();
+            check_errors(&parse);
+
+            assert_eq!(
+                prog.statements.len(),
+                1,
+                "Program not one statement long. got={}",
+                prog.statements.len()
+            );
+
+            let Statement::Expression { ref value, .. } = prog.statements[0] else {
+                panic!("Not Expression. got {:?}", prog.statements[0]);
+            };
+
+            let Expression::PrefixExpression(PrefixExpression { token, right }) = value else {
+                panic!("Not PrefixExpression. got {:?}", value);
+            };
+            assert_eq!(token.token_type, token_type);
+
+            let Expression::IntegerLiteral(IntegerLiteral {
+                ref token,
+                ref value,
+            }) = **right
+            else {
+                panic!("Not IntegerLiteral. got {:?}", value);
+            };
+
+            assert_eq!(token.token_type, TokenType::Integer);
+            assert_eq!(token.literal, Some(expected.to_string()));
+            assert_eq!(*value, expected);
+        }
+    }
+
     fn test_let_statement(stmnt: &Statement, expected: &str) {
         let Statement::Let {
             token,
@@ -196,15 +374,22 @@ mod tests {
             panic!("Not let statement. Got {:?}", stmnt);
         };
 
-        assert_eq!(*token, Token::Let, "Not let token. Got {:?}", token);
         assert_eq!(
-            name.value, expected,
+            token.token_type,
+            TokenType::Let,
+            "Not let token. Got {:?}",
+            token
+        );
+        assert_eq!(
+            name.string(),
+            expected,
             "Not correct name. Got {} instead of {}",
-            name.value, expected
+            name.string(),
+            expected
         );
         assert_eq!(
             name.token(),
-            Some(&Token::Identifier(expected.into())),
+            Some(&Token::new_ident(expected.into())),
             "Not correct token. Got {:?}",
             name.token()
         );

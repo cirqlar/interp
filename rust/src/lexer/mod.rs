@@ -1,4 +1,4 @@
-use crate::Token as T;
+use crate::{Token, TokenType as T};
 
 pub struct Lexer {
     chars: Vec<char>,
@@ -47,8 +47,10 @@ impl Lexer {
         self.chars.get(self.read_position).copied()
     }
 
-    pub fn next_token(&mut self) -> T {
-        let Some(c) = self.ch else { return T::EOF };
+    pub fn next_token(&mut self) -> Token {
+        let Some(c) = self.ch else {
+            return Token::EOF.clone();
+        };
 
         match c {
             x if char::is_whitespace(x) => {
@@ -73,28 +75,28 @@ impl Lexer {
         ident.iter().collect()
     }
 
-    fn match_identifier(&mut self) -> T {
+    fn match_identifier(&mut self) -> Token {
         let ident: String = self.match_characters(is_valid_identifier_char);
 
         match ident.as_str() {
-            "let" => T::Let,
-            "fn" => T::Function,
-            "true" => T::True,
-            "false" => T::False,
-            "if" => T::If,
-            "else" => T::Else,
-            "return" => T::Return,
-            _ => T::Identifier(ident),
+            "let" => T::Let.into(),
+            "fn" => T::Function.into(),
+            "true" => T::True.into(),
+            "false" => T::False.into(),
+            "if" => T::If.into(),
+            "else" => T::Else.into(),
+            "return" => T::Return.into(),
+            _ => Token::new_ident(ident),
         }
     }
 
-    fn match_number(&mut self) -> T {
+    fn match_number(&mut self) -> Token {
         let ident: String = self.match_characters(is_valid_number_char);
 
-        T::Integer(ident)
+        Token::new_integer(ident)
     }
 
-    fn match_symbol(&mut self) -> T {
+    fn match_symbol(&mut self) -> Token {
         let t = match self.ch.unwrap() {
             '=' => or_equal(self, T::Equal, T::Assign),
             '+' => T::Plus,
@@ -115,7 +117,7 @@ impl Lexer {
         };
 
         self.read_next_char();
-        t
+        t.into()
     }
 
     fn skip_whitespace(&mut self) {
@@ -152,7 +154,7 @@ mod tests {
         ];
 
         for token in expected {
-            assert_eq!(token, lex.next_token());
+            assert_eq!(token, lex.next_token().token_type);
         }
     }
 
@@ -169,43 +171,43 @@ mod tests {
         let mut lex = Lexer::new(input);
 
         let expected = [
-            T::Let,
-            T::Identifier("five".into()),
-            T::Assign,
-            T::Integer("5".into()),
-            T::Semicolon,
-            T::Let,
-            T::Identifier("ten".into()),
-            T::Assign,
-            T::Integer("10".into()),
-            T::Semicolon,
-            T::Let,
-            T::Identifier("add".into()),
-            T::Assign,
-            T::Function,
-            T::LParen,
-            T::Identifier("x".into()),
-            T::Comma,
-            T::Identifier("y".into()),
-            T::RParen,
-            T::LBrace,
-            T::Identifier("x".into()),
-            T::Plus,
-            T::Identifier("y".into()),
-            T::Semicolon,
-            T::RBrace,
-            T::Semicolon,
-            T::Let,
-            T::Identifier("result".into()),
-            T::Assign,
-            T::Identifier("add".into()),
-            T::LParen,
-            T::Identifier("five".into()),
-            T::Comma,
-            T::Identifier("ten".into()),
-            T::RParen,
-            T::Semicolon,
-            T::EOF,
+            Token::new(T::Let),
+            Token::new_ident("five".into()),
+            Token::new(T::Assign),
+            Token::new_integer("5".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::Let),
+            Token::new_ident("ten".into()),
+            Token::new(T::Assign),
+            Token::new_integer("10".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::Let),
+            Token::new_ident("add".into()),
+            Token::new(T::Assign),
+            Token::new(T::Function),
+            Token::new(T::LParen),
+            Token::new_ident("x".into()),
+            Token::new(T::Comma),
+            Token::new_ident("y".into()),
+            Token::new(T::RParen),
+            Token::new(T::LBrace),
+            Token::new_ident("x".into()),
+            Token::new(T::Plus),
+            Token::new_ident("y".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::RBrace),
+            Token::new(T::Semicolon),
+            Token::new(T::Let),
+            Token::new_ident("result".into()),
+            Token::new(T::Assign),
+            Token::new_ident("add".into()),
+            Token::new(T::LParen),
+            Token::new_ident("five".into()),
+            Token::new(T::Comma),
+            Token::new_ident("ten".into()),
+            Token::new(T::RParen),
+            Token::new(T::Semicolon),
+            Token::new(T::EOF),
         ];
 
         for token in expected {
@@ -237,82 +239,82 @@ mod tests {
         let mut lex = Lexer::new(input);
 
         let expected = [
-            T::Let,
-            T::Identifier("five".into()),
-            T::Assign,
-            T::Integer("5".into()),
-            T::Semicolon,
-            T::Let,
-            T::Identifier("ten".into()),
-            T::Assign,
-            T::Integer("10".into()),
-            T::Semicolon,
-            T::Let,
-            T::Identifier("add".into()),
-            T::Assign,
-            T::Function,
-            T::LParen,
-            T::Identifier("x".into()),
-            T::Comma,
-            T::Identifier("y".into()),
-            T::RParen,
-            T::LBrace,
-            T::Identifier("x".into()),
-            T::Plus,
-            T::Identifier("y".into()),
-            T::Semicolon,
-            T::RBrace,
-            T::Semicolon,
-            T::Let,
-            T::Identifier("result".into()),
-            T::Assign,
-            T::Identifier("add".into()),
-            T::LParen,
-            T::Identifier("five".into()),
-            T::Comma,
-            T::Identifier("ten".into()),
-            T::RParen,
-            T::Semicolon,
-            T::Bang,
-            T::Minus,
-            T::ForwardSlash,
-            T::Asterisk,
-            T::Integer("5".into()),
-            T::Semicolon,
-            T::Integer("5".into()),
-            T::LessThan,
-            T::Integer("10".into()),
-            T::GreaterThan,
-            T::Integer("5".into()),
-            T::Semicolon,
-            T::If,
-            T::LParen,
-            T::Integer("5".into()),
-            T::LessThan,
-            T::Integer("10".into()),
-            T::RParen,
-            T::LBrace,
-            T::Return,
-            T::True,
-            T::Semicolon,
-            T::RBrace,
-            T::Else,
-            T::LBrace,
-            T::Return,
-            T::False,
-            T::Semicolon,
-            T::RBrace,
-            T::Integer("10".into()),
-            T::Equal,
-            T::Integer("10".into()),
-            T::Semicolon,
-            T::Integer("10".into()),
-            T::NotEqual,
-            T::Integer("9".into()),
-            T::Semicolon,
-            T::LessThanOrEqual,
-            T::GreaterThanOrEqual,
-            T::EOF,
+            Token::new(T::Let),
+            Token::new_ident("five".into()),
+            Token::new(T::Assign),
+            Token::new_integer("5".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::Let),
+            Token::new_ident("ten".into()),
+            Token::new(T::Assign),
+            Token::new_integer("10".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::Let),
+            Token::new_ident("add".into()),
+            Token::new(T::Assign),
+            Token::new(T::Function),
+            Token::new(T::LParen),
+            Token::new_ident("x".into()),
+            Token::new(T::Comma),
+            Token::new_ident("y".into()),
+            Token::new(T::RParen),
+            Token::new(T::LBrace),
+            Token::new_ident("x".into()),
+            Token::new(T::Plus),
+            Token::new_ident("y".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::RBrace),
+            Token::new(T::Semicolon),
+            Token::new(T::Let),
+            Token::new_ident("result".into()),
+            Token::new(T::Assign),
+            Token::new_ident("add".into()),
+            Token::new(T::LParen),
+            Token::new_ident("five".into()),
+            Token::new(T::Comma),
+            Token::new_ident("ten".into()),
+            Token::new(T::RParen),
+            Token::new(T::Semicolon),
+            Token::new(T::Bang),
+            Token::new(T::Minus),
+            Token::new(T::ForwardSlash),
+            Token::new(T::Asterisk),
+            Token::new_integer("5".into()),
+            Token::new(T::Semicolon),
+            Token::new_integer("5".into()),
+            Token::new(T::LessThan),
+            Token::new_integer("10".into()),
+            Token::new(T::GreaterThan),
+            Token::new_integer("5".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::If),
+            Token::new(T::LParen),
+            Token::new_integer("5".into()),
+            Token::new(T::LessThan),
+            Token::new_integer("10".into()),
+            Token::new(T::RParen),
+            Token::new(T::LBrace),
+            Token::new(T::Return),
+            Token::new(T::True),
+            Token::new(T::Semicolon),
+            Token::new(T::RBrace),
+            Token::new(T::Else),
+            Token::new(T::LBrace),
+            Token::new(T::Return),
+            Token::new(T::False),
+            Token::new(T::Semicolon),
+            Token::new(T::RBrace),
+            Token::new_integer("10".into()),
+            Token::new(T::Equal),
+            Token::new_integer("10".into()),
+            Token::new(T::Semicolon),
+            Token::new_integer("10".into()),
+            Token::new(T::NotEqual),
+            Token::new_integer("9".into()),
+            Token::new(T::Semicolon),
+            Token::new(T::LessThanOrEqual),
+            Token::new(T::GreaterThanOrEqual),
+            Token::new(T::EOF),
         ];
 
         for token in expected {

@@ -7,8 +7,6 @@ pub trait Node: Debug {
     fn string(&self) -> String;
 }
 
-pub trait Expression: Node {}
-
 #[derive(Debug, Default)]
 pub struct Program {
     pub(crate) statements: Vec<Statement>,
@@ -44,15 +42,15 @@ pub enum Statement {
     Let {
         token: Token,
         name: Identifier,
-        value: Option<Box<dyn Expression>>,
+        value: Option<Expression>,
     },
     Return {
         token: Token,
-        value: Option<Box<dyn Expression>>,
+        value: Option<Expression>,
     },
     Expression {
         token: Token,
-        value: Box<dyn Expression>,
+        value: Expression,
     },
 }
 use Statement as S;
@@ -64,7 +62,7 @@ impl Statement {
         };
 
         let mut out = String::from("let ");
-        out.push_str(&format!("{} = ", name.value));
+        out.push_str(&format!("{} = ", name.string()));
         if let Some(expr) = value {
             out.push_str(&expr.string());
         }
@@ -118,7 +116,6 @@ impl Node for Statement {
 #[derive(Debug)]
 pub struct Identifier {
     pub(crate) token: Token,
-    pub value: String,
 }
 
 impl Node for Identifier {
@@ -127,28 +124,111 @@ impl Node for Identifier {
     }
 
     fn string(&self) -> String {
-        self.value.clone()
+        self.token.to_string()
     }
 }
-impl Expression for Identifier {}
+
+#[derive(Debug)]
+pub struct IntegerLiteral {
+    pub(crate) token: Token,
+    pub value: i64,
+}
+
+impl Node for IntegerLiteral {
+    fn token(&self) -> Option<&Token> {
+        Some(&self.token)
+    }
+
+    fn string(&self) -> String {
+        self.token.literal.as_ref().map_or("".into(), |s| s.clone())
+    }
+}
+
+#[derive(Debug)]
+pub struct PrefixExpression {
+    pub(crate) token: Token,
+    pub right: Box<Expression>,
+}
+
+impl Node for PrefixExpression {
+    fn token(&self) -> Option<&Token> {
+        Some(&self.token)
+    }
+
+    fn string(&self) -> String {
+        let mut out = String::from("(");
+        out.push_str(&self.token.to_string());
+        out.push_str(&self.right.string());
+        out.push(')');
+
+        out
+    }
+}
+
+#[derive(Debug)]
+pub enum Expression {
+    Identifier(Identifier),
+    IntegerLiteral(IntegerLiteral),
+    PrefixExpression(PrefixExpression),
+}
+
+use Expression as E;
+
+impl Node for Expression {
+    fn token(&self) -> Option<&Token> {
+        match self {
+            E::Identifier(x) => x.token(),
+            E::IntegerLiteral(x) => x.token(),
+            E::PrefixExpression(x) => x.token(),
+        }
+    }
+
+    fn string(&self) -> String {
+        match self {
+            E::Identifier(x) => x.string(),
+            E::IntegerLiteral(x) => x.string(),
+            E::PrefixExpression(x) => x.string(),
+        }
+    }
+}
+
+impl From<Identifier> for Expression {
+    fn from(value: Identifier) -> Self {
+        E::Identifier(value)
+    }
+}
+
+impl From<IntegerLiteral> for Expression {
+    fn from(value: IntegerLiteral) -> Self {
+        E::IntegerLiteral(value)
+    }
+}
+
+impl From<PrefixExpression> for Expression {
+    fn from(value: PrefixExpression) -> Self {
+        E::PrefixExpression(value)
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::TokenType;
 
     #[test]
     fn test_string() {
         let prog = Program {
             statements: vec![Statement::Let {
-                token: Token::Let,
+                token: Token::new(TokenType::Let),
                 name: Identifier {
-                    token: Token::Identifier("myVar".into()),
-                    value: "myVar".into(),
+                    token: Token::new_ident("myVar".into()),
                 },
-                value: Some(Box::from(Identifier {
-                    token: Token::Identifier("anotherVar".into()),
-                    value: "anotherVar".into(),
-                })),
+                value: Some(
+                    Identifier {
+                        token: Token::new_ident("anotherVar".into()),
+                    }
+                    .into(),
+                ),
             }],
         };
 
