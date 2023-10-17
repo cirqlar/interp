@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <map>
 
 #include "shared/token.h"
 #include "lexer/lexer.h"
@@ -10,6 +11,17 @@
 
 namespace interp::parser
 {
+	enum Precidence
+	{
+		LOWEST,
+		EQUALS,		 // ==
+		LESSGREATER, // > or < or <= or >=
+		SUM,		 // +
+		PRODUCT,	 // *
+		PREFIX,		 // -X or !X
+		CALL,		 // myFunction(X)
+	};
+
 	class Parser
 	{
 	public:
@@ -25,13 +37,23 @@ namespace interp::parser
 		interp::token::Token peek_token;
 		std::vector<std::string> errors;
 
+		std::map<interp::token::TokenType, std::shared_ptr<interp::ast::Expression> (*)(Parser *)> prefix_parse_fns;
+		std::map<interp::token::TokenType, std::shared_ptr<interp::ast::Expression> (*)(Parser *, std::shared_ptr<interp::ast::Expression>)> infix_parse_fns;
+
 		void next_token();
 		std::shared_ptr<interp::ast::Statement> parse_statement();
 		std::shared_ptr<interp::ast::LetStatement> parse_let_statement();
 		std::shared_ptr<interp::ast::ReturnStatement> parse_return_statement();
+		std::shared_ptr<interp::ast::ExpressionStatement> parse_expression_statement();
+		std::shared_ptr<interp::ast::Expression> parse_expression(Precidence);
+		static std::shared_ptr<interp::ast::Expression> parse_identifier(Parser *);
+		static std::shared_ptr<interp::ast::Expression> parse_integer_literal(Parser *);
+		static std::shared_ptr<interp::ast::Expression> parse_prefix_expression(Parser *);
+
 		bool current_token_is(interp::token::TokenType type);
 		bool peek_token_is(interp::token::TokenType type);
 		bool expect_peek(interp::token::TokenType type);
 		void peek_error(interp::token::TokenType type);
+		void no_prefix_parse_fn_error(interp::token::TokenType type);
 	};
 }

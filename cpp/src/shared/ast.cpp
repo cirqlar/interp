@@ -87,6 +87,11 @@ namespace interp::ast
 		return out;
 	}
 
+	ExpressionStatement::ExpressionStatement(interp::token::Token token, std::shared_ptr<Expression> expression)
+		: token(token), expression(expression)
+	{
+	}
+
 	std::string ExpressionStatement::token_literal()
 	{
 		return this->token.literal;
@@ -102,5 +107,34 @@ namespace interp::ast
 		{
 			return "";
 		}
+	}
+
+	IntegerLiteral::IntegerLiteral(interp::token::Token token, int64_t value) : token(token), value(value)
+	{
+	}
+
+	std::string IntegerLiteral::token_literal()
+	{
+		return this->token.literal;
+	}
+
+	std::string IntegerLiteral::string()
+	{
+		return this->token.literal;
+	}
+
+	PrefixExpression::PrefixExpression(interp::token::Token token, std::string p_operator, std::shared_ptr<Expression> right)
+		: token(token), p_operator(p_operator), right(right)
+	{
+	}
+
+	std::string PrefixExpression::token_literal()
+	{
+		return this->token.literal;
+	}
+
+	std::string PrefixExpression::string()
+	{
+		return "(" + this->token_literal() + this->right->string() + ")";
 	}
 }

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <stdint.h>
 
 #include "shared/token.h"
 
@@ -15,26 +16,9 @@ namespace interp::ast
 		virtual std::string string() = 0;
 	};
 
-	class Statement : public Node
-	{
-	};
-
+	// ******** Expressions ********
 	class Expression : public Node
 	{
-	};
-
-
-	class Program: public Node
-	{
-	public:
-		Program(std::vector<std::shared_ptr<Statement>> statements);
-		Program() = default;
-		~Program() = default;
-
-		std::vector<std::shared_ptr<Statement>> statements;
-
-		std::string token_literal() override;
-		std::string string() override;
 	};
 
 	class Identifier: public Expression
@@ -48,6 +32,38 @@ namespace interp::ast
 
 		std::string token_literal() override;
 		std::string string() override;
+	};
+
+	class IntegerLiteral: public Expression
+	{
+	public:
+		IntegerLiteral(interp::token::Token token, int64_t value);
+		~IntegerLiteral() = default;
+
+		interp::token::Token token;
+		int64_t value;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	class PrefixExpression: public Expression
+	{
+	public:
+		PrefixExpression(interp::token::Token token, std::string p_operator, std::shared_ptr<Expression> right);
+		~PrefixExpression() = default;
+
+		interp::token::Token token;
+		std::string p_operator;
+		std::shared_ptr<Expression> right;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	// ******** Statements ********
+	class Statement : public Node
+	{
 	};
 
 	class LetStatement: public Statement
@@ -80,13 +96,29 @@ namespace interp::ast
 	class ExpressionStatement: public Statement
 	{
 	public:
+		ExpressionStatement(interp::token::Token token, std::shared_ptr<Expression> expression);
+		~ExpressionStatement() = default;
+
 		interp::token::Token token;
-		std::unique_ptr<Expression> expression;
+		std::shared_ptr<Expression> expression;
 
 		std::string token_literal() override;
 		std::string string() override;
 	};
 
+	// ******** Program ********
+	class Program: public Node
+	{
+	public:
+		Program(std::vector<std::shared_ptr<Statement>> statements);
+		Program() = default;
+		~Program() = default;
+
+		std::vector<std::shared_ptr<Statement>> statements;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
 	
 
 }
