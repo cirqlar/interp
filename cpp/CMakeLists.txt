@@ -6,6 +6,11 @@ set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 add_library(interp_compiler_flags INTERFACE)
 target_compile_features(interp_compiler_flags INTERFACE cxx_std_20)
 target_include_directories(interp_compiler_flags INTERFACE "${PROJECT_SOURCE_DIR}")
+target_compile_options(interp_compiler_flags INTERFACE
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+          -Wall -Wextra -Wpedantic>
+     $<$<CXX_COMPILER_ID:MSVC>:
+          /W4>)
 
 add_executable(
   interp

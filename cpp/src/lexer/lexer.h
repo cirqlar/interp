@@ -14,8 +14,8 @@ namespace interp::lexer
 
 	private:
 		std::string input;
-		int position;
-		int read_position;
+		size_t position;
+		size_t read_position;
 		char ch;
 
 		void read_char();

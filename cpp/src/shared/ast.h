@@ -12,6 +12,8 @@ namespace interp::ast
 	class Node
 	{
 	public:
+		virtual ~Node() = default;
+
 		virtual std::string token_literal() = 0;
 		virtual std::string string() = 0;
 	};
@@ -19,6 +21,8 @@ namespace interp::ast
 	// ******** Expressions ********
 	class Expression : public Node
 	{
+	public:
+		virtual ~Expression() = default;
 	};
 
 	class Identifier: public Expression
