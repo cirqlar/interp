@@ -22,6 +22,6 @@ namespace interp::lexer
 		char peek_char();
 		void skip_whitespace();
 		std::string read_while(bool (*func)(char));
-		interp::token::Token new_token(interp::token::TokenType Type, char ch);
+		interp::token::Token new_token(interp::token::TokenType Type, char in_ch);
 	};
 }

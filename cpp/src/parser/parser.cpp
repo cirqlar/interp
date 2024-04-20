@@ -2,6 +2,19 @@
 
 namespace interp::parser
 {
+	std::map<token::TokenType, Precidence> precidences({
+		std::pair(token::EQUAL, Precidence::EQUALS),
+		std::pair(token::NOTEQUAL, Precidence::EQUALS),
+		std::pair(token::LESSTHANOREQUAL, Precidence::LESSGREATER),
+		std::pair(token::GREATERTHANOREQUAL, Precidence::LESSGREATER),
+		std::pair(token::LESSTHAN, Precidence::LESSGREATER),
+		std::pair(token::GREATERTHAN, Precidence::LESSGREATER),
+		std::pair(token::PLUS, Precidence::SUM),
+		std::pair(token::MINUS, Precidence::SUM),
+		std::pair(token::FORWARDSLASH, Precidence::PRODUCT),
+		std::pair(token::ASTERISK, Precidence::PRODUCT),
+	});
+
 	Parser::Parser(interp::lexer::Lexer lexer) : lexer(lexer), prefix_parse_fns({}), infix_parse_fns({})
 	{
 		this->next_token();
@@ -11,6 +24,20 @@ namespace interp::parser
 		this->prefix_parse_fns[interp::token::INT] = this->parse_integer_literal;
 		this->prefix_parse_fns[interp::token::BANG] = this->parse_prefix_expression;
 		this->prefix_parse_fns[interp::token::MINUS] = this->parse_prefix_expression;
+		this->prefix_parse_fns[interp::token::TRUE] = this->parse_boolean;
+		this->prefix_parse_fns[interp::token::FALSE] = this->parse_boolean;
+		this->prefix_parse_fns[interp::token::LPAREN] = this->parse_grouped_expression;
+
+		this->infix_parse_fns[interp::token::EQUAL] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::NOTEQUAL] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::LESSTHANOREQUAL] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::GREATERTHANOREQUAL] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::LESSTHAN] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::GREATERTHAN] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::PLUS] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::MINUS] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::FORWARDSLASH] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::ASTERISK] = this->parse_infix_expression;
 	}
 
 	std::shared_ptr<interp::ast::Program> Parser::parse_program()
@@ -109,16 +136,26 @@ namespace interp::parser
 		return exprstmnt;
 	}
 
-	std::shared_ptr<interp::ast::Expression> Parser::parse_expression(Precidence)
+	std::shared_ptr<interp::ast::Expression> Parser::parse_expression(Precidence in_precidence)
 	{
 		if (this->prefix_parse_fns.find(this->current_token.type) == this->prefix_parse_fns.end())
 		{
 			this->no_prefix_parse_fn_error(this->current_token.type);
-			return std::shared_ptr<interp::ast::Expression>(nullptr);
+			return nullptr;
+			//return std::shared_ptr<interp::ast::Expression>(nullptr);
 		}
-		auto prefix = this->prefix_parse_fns[this->current_token.type];
+		auto left_expr = this->prefix_parse_fns[this->current_token.type](this);
 
-		auto left_expr = prefix(this);
+		while (!this->peek_token_is(interp::token::SEMICOLON) && in_precidence < this->peek_precidence())
+		{
+			if (this->infix_parse_fns.find(this->peek_token.type) == this->infix_parse_fns.end())
+			{
+				return left_expr;
+			}
+			this->next_token();
+
+			left_expr = this->infix_parse_fns[this->current_token.type](this, left_expr);
+		}
 
 		return left_expr;
 	}
@@ -133,7 +170,7 @@ namespace interp::parser
 	{
 		try
 		{
-			auto val = std::stoll(p->current_token.literal);
+			auto val = std::atoll(p->current_token.literal.c_str());
 			return std::shared_ptr<interp::ast::IntegerLiteral>(
 				new interp::ast::IntegerLiteral(p->current_token, val));
 		}
@@ -142,7 +179,26 @@ namespace interp::parser
 			p->errors.push_back("could not parse " + p->current_token.literal + " as an integer");
 			return std::shared_ptr<interp::ast::IntegerLiteral>(nullptr);
 		}
-		return std::shared_ptr<interp::ast::IntegerLiteral>();
+	}
+
+	std::shared_ptr<interp::ast::Expression> Parser::parse_boolean(Parser *p)
+	{
+		return std::shared_ptr<interp::ast::Boolean>(
+			new interp::ast::Boolean(p->current_token, p->current_token_is(interp::token::TRUE)));
+	}
+
+	std::shared_ptr<interp::ast::Expression> Parser::parse_grouped_expression(Parser *p)
+	{
+		p->next_token();
+
+		auto expr = p->parse_expression(Precidence::LOWEST);
+
+		if (!p->expect_peek(interp::token::RPAREN))
+		{
+			return nullptr;
+		}
+
+		return expr;
 	}
 
 	std::shared_ptr<interp::ast::Expression> Parser::parse_prefix_expression(Parser *p)
@@ -154,6 +210,21 @@ namespace interp::parser
 				current_token,
 				current_token.literal,
 				p->parse_expression(PREFIX)
+			)
+		);
+	}
+
+	std::shared_ptr<interp::ast::Expression> Parser::parse_infix_expression(Parser *p, std::shared_ptr<interp::ast::Expression> left)
+	{
+		auto current_token = p->current_token;
+		auto current_precidence = p->curr_precidence();
+		p->next_token();
+		return std::shared_ptr<interp::ast::InfixExpression>(
+			new interp::ast::InfixExpression(
+				current_token,
+				left,
+				current_token.literal,
+				p->parse_expression(current_precidence)
 			)
 		);
 	}
@@ -191,4 +262,27 @@ namespace interp::parser
 	{
 		this->errors.push_back("No prefix parse fn found for " + type);
 	}
+
+	Precidence Parser::peek_precidence()
+	{
+		if (precidences.find(this->peek_token.type) == precidences.end())
+		{
+			return Precidence::LOWEST;
+		}
+		else {
+			return precidences[this->peek_token.type];
+		}
+	}
+
+	Precidence Parser::curr_precidence()
+	{
+		if (precidences.find(this->current_token.type) == precidences.end())
+		{
+			return Precidence::LOWEST;
+		}
+		else {
+			return precidences[this->current_token.type];
+		}
+	}
+
 }

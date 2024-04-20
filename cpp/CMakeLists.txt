@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.28)
 
 project(interp)
 set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")

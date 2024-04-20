@@ -51,6 +51,19 @@ namespace interp::ast
 		std::string string() override;
 	};
 
+	class Boolean : public Expression
+	{
+	public:
+		Boolean(interp::token::Token token, bool value);
+		~Boolean() = default;
+
+		interp::token::Token token;
+		bool value;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
 	class PrefixExpression: public Expression
 	{
 	public:
@@ -58,6 +71,21 @@ namespace interp::ast
 		~PrefixExpression() = default;
 
 		interp::token::Token token;
+		std::string p_operator;
+		std::shared_ptr<Expression> right;
+
+		std::string token_literal() override;
+		std::string string() override;
+	};
+
+	class InfixExpression : public Expression
+	{
+	public:
+		InfixExpression(interp::token::Token token, std::shared_ptr<Expression> left, std::string p_operator, std::shared_ptr<Expression> right);
+		~InfixExpression() = default;
+
+		interp::token::Token token;
+		std::shared_ptr<Expression> left;
 		std::string p_operator;
 		std::shared_ptr<Expression> right;
 

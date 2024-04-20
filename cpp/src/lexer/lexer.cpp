@@ -29,9 +29,9 @@ namespace interp::lexer
 		case '=':
 			if (this->peek_char() == '=')
 			{
-				char ch = this->ch;
+				char cur_ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::token::EQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::EQUAL, .literal = std::string(1, cur_ch) + std::string(1, this->ch)};
 			}
 			else
 			{
@@ -53,9 +53,9 @@ namespace interp::lexer
 		case '!':
 			if (this->peek_char() == '=')
 			{
-				char ch = this->ch;
+				char cur_ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::token::NOTEQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::NOTEQUAL, .literal = std::string(1, cur_ch) + std::string(1, this->ch)};
 			}
 			else
 			{
@@ -65,9 +65,9 @@ namespace interp::lexer
 		case '<':
 			if (this->peek_char() == '=')
 			{
-				char ch = this->ch;
+				char cur_ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::token::LESSTHANOREQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::LESSTHANOREQUAL, .literal = std::string(1, cur_ch) + std::string(1, this->ch)};
 			}
 			else
 			{
@@ -77,9 +77,9 @@ namespace interp::lexer
 		case '>':
 			if (this->peek_char() == '=')
 			{
-				char ch = this->ch;
+				char cur_ch = this->ch;
 				this->read_char();
-				tok = {.type = interp::token::GREATERTHANOREQUAL, .literal = std::string(1, ch) + std::string(1, this->ch)};
+				tok = {.type = interp::token::GREATERTHANOREQUAL, .literal = std::string(1, cur_ch) + std::string(1, this->ch)};
 			}
 			else
 			{
@@ -165,16 +165,16 @@ namespace interp::lexer
 
 	std::string Lexer::read_while(bool (*func)(char))
 	{
-		int position = this->position;
+		auto initial_position = this->position;
 		while (func(this->ch))
 		{
 			this->read_char();
 		}
-		return this->input.substr(position, this->position - position);
+		return this->input.substr(initial_position, this->position - initial_position);
 	}
 
-	interp::token::Token Lexer::new_token(interp::token::TokenType Type, char ch)
+	interp::token::Token Lexer::new_token(interp::token::TokenType Type, char in_ch)
 	{
-		return {.type = Type, .literal = std::string(1, ch)};
+		return {.type = Type, .literal = std::string(1, in_ch)};
 	}
 }
