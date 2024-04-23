@@ -5,9 +5,9 @@
 #include <vector>
 #include <map>
 
-#include "shared/token.h"
-#include "lexer/lexer.h"
-#include "shared/ast.h"
+#include "token.h"
+#include "lexer.h"
+#include "ast.h"
 
 namespace interp::parser
 {
@@ -50,6 +50,8 @@ namespace interp::parser
 		static std::shared_ptr<interp::ast::Expression> parse_integer_literal(Parser *);
 		static std::shared_ptr<interp::ast::Expression> parse_boolean(Parser*);
 		static std::shared_ptr<interp::ast::Expression> parse_grouped_expression(Parser*);
+		static std::shared_ptr<interp::ast::Expression> parse_if_expression(Parser*);
+		static std::shared_ptr<interp::ast::Expression> parse_block_expression(Parser *);
 		static std::shared_ptr<interp::ast::Expression> parse_prefix_expression(Parser *);
 		static std::shared_ptr<interp::ast::Expression> parse_infix_expression(Parser *, std::shared_ptr<interp::ast::Expression> left);
 

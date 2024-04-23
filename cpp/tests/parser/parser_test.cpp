@@ -7,6 +7,7 @@ void check_parser_errors(interp::parser::Parser p);
 void test_let_statment(std::shared_ptr<interp::ast::Statement> stmnt, std::string name);
 void test_integer_literal(std::shared_ptr<interp::ast::Expression> expr, int64_t value);
 void test_identifier(std::shared_ptr<interp::ast::Expression> expr, std::string value);
+void test_boolean(std::shared_ptr<interp::ast::Expression> expr, bool value);
 
 TEST(ParserTest, TestLetStatment)
 {
@@ -255,10 +256,10 @@ TEST(ParserTest, TestOperatorPrecedence)
 		std::tuple("3 < 5 == true", "((3 < 5) == true)"),
 
 		std::tuple("1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"),
-		/*std::tuple("(5 + 5) * 2", "((5 + 5) * 2)"),
+		std::tuple("(5 + 5) * 2", "((5 + 5) * 2)"),
 		std::tuple("2 / (5 + 5)", "(2 / (5 + 5))"),
 		std::tuple("-(5 + 5)", "(-(5 + 5))"),
-		std::tuple("!(true == true)", "(!(true == true))"),*/
+		std::tuple("!(true == true)", "(!(true == true))"),
 	};
 
 	for (auto tt : expected)
@@ -274,6 +275,284 @@ TEST(ParserTest, TestOperatorPrecedence)
 			<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
 
 		EXPECT_EQ(std::get<1>(tt), prog->statements[0]->string());
+	}
+}
+
+TEST(ParserTest, TestIfExpressionWithBlock)
+{
+	std::string input = "if (7 < 5) { x }";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::IfExpression* ifExpr = dynamic_cast<interp::ast::IfExpression*>(expstmnt->expression.get()))
+		{
+			if (interp::ast::InfixExpression* condition = dynamic_cast<interp::ast::InfixExpression*>(ifExpr->condition.get()))
+			{
+				test_integer_literal(condition->left, 7);
+
+				EXPECT_EQ("<", condition->p_operator) << "operatior not < got " << condition->p_operator;
+
+				test_integer_literal(condition->right, 5);
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+
+			if (interp::ast::BlockExpression* consequence = dynamic_cast<interp::ast::BlockExpression*>(ifExpr->consequence.get()))
+			{
+				ASSERT_EQ(1, consequence->statements.size())
+					<< "consequence.statements does not contain 1 statement. got=" << std::to_string(consequence->statements.size());
+
+				if (interp::ast::ExpressionStatement* stmnt = dynamic_cast<interp::ast::ExpressionStatement*>(consequence->statements[0].get()))
+				{
+					test_identifier(stmnt->expression, "x");
+				}
+				else
+				{
+					EXPECT_TRUE(false) << "statement not ExpressionStatement";
+				}
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not BlockExpression";
+			}
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not IfExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestIfExpression)
+{
+	std::string input = "if (7 < 5) x";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::IfExpression* ifExpr = dynamic_cast<interp::ast::IfExpression*>(expstmnt->expression.get()))
+		{
+			if (interp::ast::InfixExpression* condition = dynamic_cast<interp::ast::InfixExpression*>(ifExpr->condition.get()))
+			{
+				test_integer_literal(condition->left, 7);
+
+				EXPECT_EQ("<", condition->p_operator) << "operatior not < got " << condition->p_operator;
+
+				test_integer_literal(condition->right, 5);
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+
+			
+			test_identifier(ifExpr->consequence, "x");
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not IfExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestIfElseExpressionWithBlock)
+{
+	std::string input = "if (7 < 5) { x } else { x }";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::IfExpression* ifExpr = dynamic_cast<interp::ast::IfExpression*>(expstmnt->expression.get()))
+		{
+			if (interp::ast::InfixExpression* condition = dynamic_cast<interp::ast::InfixExpression*>(ifExpr->condition.get()))
+			{
+				test_integer_literal(condition->left, 7);
+
+				EXPECT_EQ("<", condition->p_operator) << "operatior not < got " << condition->p_operator;
+
+				test_integer_literal(condition->right, 5);
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+
+			if (interp::ast::BlockExpression* consequence = dynamic_cast<interp::ast::BlockExpression*>(ifExpr->consequence.get()))
+			{
+				ASSERT_EQ(1, consequence->statements.size())
+					<< "consequence.statements does not contain 1 statement. got=" << std::to_string(consequence->statements.size());
+
+				if (interp::ast::ExpressionStatement* stmnt = dynamic_cast<interp::ast::ExpressionStatement*>(consequence->statements[0].get()))
+				{
+					test_identifier(stmnt->expression, "x");
+				}
+				else
+				{
+					EXPECT_TRUE(false) << "statement not ExpressionStatement";
+				}
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not BlockExpression";
+			}
+
+
+			if (interp::ast::BlockExpression* alternative = dynamic_cast<interp::ast::BlockExpression*>(ifExpr->alternative.get()))
+			{
+				ASSERT_EQ(1, alternative->statements.size())
+					<< "consequence.statements does not contain 1 statement. got=" << std::to_string(alternative->statements.size());
+
+				if (interp::ast::ExpressionStatement* stmnt = dynamic_cast<interp::ast::ExpressionStatement*>(alternative->statements[0].get()))
+				{
+					test_identifier(stmnt->expression, "x");
+				}
+				else
+				{
+					EXPECT_TRUE(false) << "statement not ExpressionStatement";
+				}
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not BlockExpression";
+			}
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not IfExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestIfElseExpression)
+{
+	std::string input = "if (7 < 5) x else y";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::IfExpression* ifExpr = dynamic_cast<interp::ast::IfExpression*>(expstmnt->expression.get()))
+		{
+			if (interp::ast::InfixExpression* condition = dynamic_cast<interp::ast::InfixExpression*>(ifExpr->condition.get()))
+			{
+				test_integer_literal(condition->left, 7);
+
+				EXPECT_EQ("<", condition->p_operator) << "operatior not < got " << condition->p_operator;
+
+				test_integer_literal(condition->right, 5);
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+
+
+			test_identifier(ifExpr->consequence, "x");
+			test_identifier(ifExpr->alternative, "y");
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not IfExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestIfElseIfExpression)
+{
+	std::string input = "if (7 < 5) x else if (true) y";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::IfExpression* ifExpr = dynamic_cast<interp::ast::IfExpression*>(expstmnt->expression.get()))
+		{
+			if (interp::ast::InfixExpression* condition = dynamic_cast<interp::ast::InfixExpression*>(ifExpr->condition.get()))
+			{
+				test_integer_literal(condition->left, 7);
+
+				EXPECT_EQ("<", condition->p_operator) << "operatior not < got " << condition->p_operator;
+
+				test_integer_literal(condition->right, 5);
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+
+
+			test_identifier(ifExpr->consequence, "x");
+			if (interp::ast::IfExpression* ElseifExpr = dynamic_cast<interp::ast::IfExpression*>(ifExpr->alternative.get()))
+			{
+				test_boolean(ElseifExpr->condition, true);
+				test_identifier(ElseifExpr->consequence, "y");
+			}
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not IfExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
 	}
 }
 
@@ -331,5 +610,19 @@ void test_identifier(std::shared_ptr<interp::ast::Expression> expr, std::string 
 	else
 	{
 		EXPECT_TRUE(false) << "expression not Identifier";
+	}
+}
+
+void test_boolean(std::shared_ptr<interp::ast::Expression> expr, bool value)
+{
+	if (interp::ast::Boolean* boolean = dynamic_cast<interp::ast::Boolean*>(expr.get()))
+	{
+		EXPECT_EQ(value, boolean->value) << "value not " << value << " got " << boolean->value;
+		EXPECT_EQ(value ? "true" : "false", boolean->token_literal()) 
+			<< "token literal not " << (value ? "true" : "false") << " got " << boolean->token_literal();
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "expression not Boolean";
 	}
 }

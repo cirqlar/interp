@@ -27,6 +27,8 @@ namespace interp::parser
 		this->prefix_parse_fns[interp::token::TRUE] = this->parse_boolean;
 		this->prefix_parse_fns[interp::token::FALSE] = this->parse_boolean;
 		this->prefix_parse_fns[interp::token::LPAREN] = this->parse_grouped_expression;
+		this->prefix_parse_fns[interp::token::IF] = this->parse_if_expression;
+		this->prefix_parse_fns[interp::token::LBRACE] = this->parse_block_expression;
 
 		this->infix_parse_fns[interp::token::EQUAL] = this->parse_infix_expression;
 		this->infix_parse_fns[interp::token::NOTEQUAL] = this->parse_infix_expression;
@@ -199,6 +201,60 @@ namespace interp::parser
 		}
 
 		return expr;
+	}
+
+	std::shared_ptr<interp::ast::Expression> Parser::parse_if_expression(Parser* p)
+	{
+		auto current_token = p->current_token;
+
+		if (!p->expect_peek(interp::token::LPAREN))
+		{
+			return nullptr;
+		}
+
+		p->next_token();
+		auto condition = p->parse_expression(Precidence::LOWEST);
+
+		if (!p->expect_peek(interp::token::RPAREN))
+		{
+			return nullptr;
+		}
+
+		p->next_token();
+		auto consequence = p->parse_expression(Precidence::LOWEST);
+
+		std::shared_ptr<interp::ast::IfExpression> if_expr = std::shared_ptr<interp::ast::IfExpression>(
+			new interp::ast::IfExpression(current_token, condition, consequence)
+		);
+
+		if (p->peek_token_is(interp::token::ELSE))
+		{
+			p->next_token();
+			p->next_token();
+
+			if_expr->alternative = p->parse_expression(Precidence::LOWEST);
+		}
+
+		return if_expr;
+	}
+
+	std::shared_ptr<interp::ast::Expression> Parser::parse_block_expression(Parser* p)
+	{
+		auto block = std::shared_ptr<interp::ast::BlockExpression>(new interp::ast::BlockExpression(p->current_token));
+
+		p->next_token();
+
+		while (!p->current_token_is(interp::token::L_EOF) && !p->current_token_is(interp::token::RBRACE))
+		{
+			auto stmnt = p->parse_statement();
+			if (stmnt)
+			{
+				block->statements.push_back(stmnt);
+			}
+			p->next_token();
+		}
+
+		return block;
 	}
 
 	std::shared_ptr<interp::ast::Expression> Parser::parse_prefix_expression(Parser *p)

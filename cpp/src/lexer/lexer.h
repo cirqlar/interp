@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "shared/token.h"
+#include "token.h"
 
 namespace interp::lexer
 {

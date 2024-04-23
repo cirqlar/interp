@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "shared/token.h"
+#include "token.h"
 #include "ast.h"
 
 TEST(AstTest, TestString)

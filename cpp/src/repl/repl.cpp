@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "shared/token.h"
-#include "lexer/lexer.h"
+#include "token.h"
+#include "lexer.h"
 #include "repl.h"
 
 namespace interp::repl

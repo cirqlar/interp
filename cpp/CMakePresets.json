@@ -1,0 +1,70 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}"
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "inherits": ["base"],
+      "generator": "Visual Studio 17 2022",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x64-windows-msvc-debug",
+      "inherits": ["windows-base"],
+      "architecture": { "value": "x64" }
+    },
+    {
+      "name": "x64-windows-msvc-release",
+      "inherits": ["windows-base"],
+      "architecture": { "value": "x64" }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x64-windows-msvc-debug",
+      "inherits": ["windows-base"],
+      "configurePreset": "x64-windows-msvc-debug"
+    },
+    {
+      "name": "x64-windows-msvc-release",
+      "inherits": ["windows-base"],
+      "configurePreset": "x64-windows-msvc-release",
+      "targets": ["interp_exe", "interp_parser", "interp_lexer"]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "output": { "outputOnFailure": true, "verbosity": "verbose" }
+    },
+    {
+      "name": "x64-windows-msvc-test",
+      "inherits": ["base"],
+      "configurePreset": "x64-windows-msvc-debug"
+    }
+  ]
+}

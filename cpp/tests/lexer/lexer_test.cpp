@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "lexer.h"
-#include "shared/token.h"
+#include "token.h"
 
 // Demonstrate some basic assertions.
 TEST(LexerTest, TestNextToken)
