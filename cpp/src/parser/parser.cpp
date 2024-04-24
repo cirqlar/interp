@@ -13,6 +13,7 @@ namespace interp::parser
 		std::pair(token::MINUS, Precidence::SUM),
 		std::pair(token::FORWARDSLASH, Precidence::PRODUCT),
 		std::pair(token::ASTERISK, Precidence::PRODUCT),
+		std::pair(token::LPAREN, Precidence::CALL),
 	});
 
 	Parser::Parser(interp::lexer::Lexer lexer) : lexer(lexer), prefix_parse_fns({}), infix_parse_fns({})
@@ -41,6 +42,7 @@ namespace interp::parser
 		this->infix_parse_fns[interp::token::MINUS] = this->parse_infix_expression;
 		this->infix_parse_fns[interp::token::FORWARDSLASH] = this->parse_infix_expression;
 		this->infix_parse_fns[interp::token::ASTERISK] = this->parse_infix_expression;
+		this->infix_parse_fns[interp::token::LPAREN] = this->parse_call_expression;
 	}
 
 	std::shared_ptr<interp::ast::Program> Parser::parse_program()
@@ -102,28 +104,34 @@ namespace interp::parser
 			return std::shared_ptr<interp::ast::LetStatement>(nullptr);
 		}
 
-		// Skip to semicolon
-		while (!this->current_token_is(interp::token::SEMICOLON))
+		this->next_token();
+
+		auto value = this->parse_expression(Precidence::LOWEST);
+
+		if (this->peek_token_is(token::SEMICOLON))
 		{
 			this->next_token();
 		}
 
 		return std::shared_ptr<interp::ast::LetStatement>(
-			new interp::ast::LetStatement(current, name, std::shared_ptr<interp::ast::Expression>(nullptr)));
+			new interp::ast::LetStatement(current, name, value));
 	}
 
 	std::shared_ptr<interp::ast::ReturnStatement> Parser::parse_return_statement()
 	{
 		auto current = this->current_token;
 
-		// Skip to semicolon
-		while (!this->current_token_is(interp::token::SEMICOLON))
+		this->next_token();
+
+		auto return_value = this->parse_expression(Precidence::LOWEST);
+
+		if (this->peek_token_is(token::SEMICOLON))
 		{
 			this->next_token();
 		}
 
 		return std::shared_ptr<interp::ast::ReturnStatement>(
-			new interp::ast::ReturnStatement(current, std::shared_ptr<interp::ast::Expression>(nullptr)));
+			new interp::ast::ReturnStatement(current, return_value));
 	}
 
 	std::shared_ptr<interp::ast::ExpressionStatement> Parser::parse_expression_statement()
@@ -328,6 +336,38 @@ namespace interp::parser
 				p->parse_expression(current_precidence)
 			)
 		);
+	}
+
+	std::shared_ptr<interp::ast::Expression> Parser::parse_call_expression(Parser *p, std::shared_ptr<interp::ast::Expression> left)
+	{
+		auto call = std::shared_ptr<interp::ast::CallExpression>(
+			new interp::ast::CallExpression(p->current_token, left)
+		);
+
+		p->parse_call_arguments(call->args);
+
+		return call;
+	}
+
+	void Parser::parse_call_arguments(std::vector<std::shared_ptr<interp::ast::Expression>>& out_args)
+	{
+		if (this->peek_token_is(interp::token::RPAREN))
+		{
+			this->next_token();
+			return;
+		}
+
+		do
+		{
+			this->next_token();
+			out_args.push_back(this->parse_expression(Precidence::LOWEST));
+			this->next_token();
+		} while (this->current_token_is(interp::token::COMMA));
+
+		if (!this->current_token_is(interp::token::RPAREN))
+		{
+			this->current_error(interp::token::RPAREN);
+		}
 	}
 
 	bool Parser::current_token_is(interp::token::TokenType type)

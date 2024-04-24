@@ -2,6 +2,7 @@
 
 #include "./ast/block.h"
 #include "./ast/bool.h"
+#include "./ast/call.h"
 #include "./ast/expr.h"
 #include "./ast/fn_literal.h"
 #include "./ast/ident.h"

@@ -3,6 +3,7 @@
 
 #include "token.h"
 #include "lexer.h"
+#include "parser.h"
 #include "repl.h"
 
 namespace interp::repl
@@ -16,10 +17,19 @@ namespace interp::repl
 			std::getline(std::cin, input);
 
 			interp::lexer::Lexer lex(input);
-			for (auto tok = lex.next_token(); tok.type != interp::token::L_EOF; tok = lex.next_token())
+			interp::parser::Parser parse(lex);
+
+			auto prog = parse.parse_program();
+
+			for (auto& error : parse.get_errors())
 			{
-				std::cout << "Type: " << tok.type << " Literal: " << tok.literal << '\n';
+				std::cout << '\t' << error << '\n';
+				goto end_while_loop;
 			}
+
+			std::cout << prog->string() << '\n';
+
+			end_while_loop:
 			input.clear();
 		}
 	}

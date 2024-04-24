@@ -23,7 +23,7 @@ namespace interp::ast
 		std::string out;
 		for (auto stmnt : this->statements)
 		{
-			out += stmnt->string();
+			out += stmnt->string() + '\n';
 		}
 
 		return out;

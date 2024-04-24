@@ -761,6 +761,134 @@ TEST(ParserTest, TestFunctionLiteralOneParam)
 	}
 }
 
+TEST(ParserTest, TestCallTwoParams)
+{
+	std::string input = "adder(x, y)";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::CallExpression* callExpr = dynamic_cast<interp::ast::CallExpression*>(expstmnt->expression.get()))
+		{
+			test_identifier(callExpr->function, "adder");
+
+			ASSERT_EQ(2, callExpr->args.size())
+				<< "call args does not contain 2 identifiers, got=" << std::to_string(callExpr->args.size());
+
+			test_identifier(callExpr->args[0], "x");
+			test_identifier(callExpr->args[1], "y");
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not CallExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestCallNoParams)
+{
+	std::string input = "adder()";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::CallExpression* callExpr = dynamic_cast<interp::ast::CallExpression*>(expstmnt->expression.get()))
+		{
+			test_identifier(callExpr->function, "adder");
+
+			ASSERT_EQ(0, callExpr->args.size())
+				<< "call args does not contain 0 identifiers, got=" << std::to_string(callExpr->args.size());
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not CallExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestCallOneParam)
+{
+	std::string input = "(fn(x) x-y)(x)";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::CallExpression* callExpr = dynamic_cast<interp::ast::CallExpression*>(expstmnt->expression.get()))
+		{
+			if (interp::ast::FunctionLiteral* fnLit = dynamic_cast<interp::ast::FunctionLiteral*>(callExpr->function.get()))
+			{
+				ASSERT_EQ(1, fnLit->params.size())
+					<< "fn params does not contain 1 identifiers, got=" << std::to_string(fnLit->params.size());
+
+				test_identifier(fnLit->params[0], "x");
+
+
+				if (interp::ast::InfixExpression* fnStmnt = dynamic_cast<interp::ast::InfixExpression*>(fnLit->body.get()))
+				{
+					test_identifier(fnStmnt->left, "x");
+
+					EXPECT_EQ("-", fnStmnt->p_operator) << "operatior not - got " << fnStmnt->p_operator;
+
+					test_identifier(fnStmnt->right, "y");
+				}
+				else
+				{
+					EXPECT_TRUE(false) << "expression not InfixExpression";
+				}
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not FunctionLiteral";
+			}
+
+			ASSERT_EQ(1, callExpr->args.size())
+				<< "call args does not contain 1 identifiers, got=" << std::to_string(callExpr->args.size());
+
+			test_identifier(callExpr->args[0], "x");
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not CallExpression";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
 void check_parser_errors(interp::parser::Parser p)
 {
 	auto errors = p.get_errors();

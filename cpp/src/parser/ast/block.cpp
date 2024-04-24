@@ -14,11 +14,12 @@ namespace interp::ast
 
 	std::string BlockExpression::string()
 	{
-		std::string out;
+		std::string out = "{ ";
 		for (auto stmnt : this->statements)
 		{
-			out += stmnt->string();
+			out += stmnt->string() + " ";
 		}
+		out += "}";
 
 		return out;
 	}

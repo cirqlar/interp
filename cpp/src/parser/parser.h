@@ -56,6 +56,8 @@ namespace interp::parser
 		void parse_function_parameters(std::vector<std::shared_ptr<interp::ast::Identifier>>&);
 		static std::shared_ptr<interp::ast::Expression> parse_prefix_expression(Parser *);
 		static std::shared_ptr<interp::ast::Expression> parse_infix_expression(Parser *, std::shared_ptr<interp::ast::Expression> left);
+		static std::shared_ptr<interp::ast::Expression> parse_call_expression(Parser*, std::shared_ptr<interp::ast::Expression> left);
+		void parse_call_arguments(std::vector<std::shared_ptr<interp::ast::Expression>>&);
 
 		bool current_token_is(interp::token::TokenType type);
 		bool peek_token_is(interp::token::TokenType type);
