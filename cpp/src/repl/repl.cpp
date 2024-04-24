@@ -20,16 +20,20 @@ namespace interp::repl
 			interp::parser::Parser parse(lex);
 
 			auto prog = parse.parse_program();
+			auto errors = parse.get_errors();
 
-			for (auto& error : parse.get_errors())
+			if (errors.size() > 0)
 			{
-				std::cout << '\t' << error << '\n';
-				goto end_while_loop;
+				for (auto& error : parse.get_errors())
+				{
+					std::cout << '\t' << error << '\n';
+				}
+			}
+			else
+			{
+				std::cout << prog->string() << '\n';
 			}
 
-			std::cout << prog->string() << '\n';
-
-			end_while_loop:
 			input.clear();
 		}
 	}
