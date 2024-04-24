@@ -12,7 +12,9 @@ add_library(interp_parser STATIC
 	"ast/let.cpp"
 	"ast/prefix.cpp"
 	"ast/return.cpp"
-	"ast/program.cpp")
+	"ast/program.cpp"
+	"ast/fn_literal.cpp"
+)
 target_include_directories(interp_parser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(interp_parser PUBLIC interp_lexer)
 

@@ -52,12 +52,15 @@ namespace interp::parser
 		static std::shared_ptr<interp::ast::Expression> parse_grouped_expression(Parser*);
 		static std::shared_ptr<interp::ast::Expression> parse_if_expression(Parser*);
 		static std::shared_ptr<interp::ast::Expression> parse_block_expression(Parser *);
+		static std::shared_ptr<interp::ast::Expression> parse_function_literal(Parser*);
+		void parse_function_parameters(std::vector<std::shared_ptr<interp::ast::Identifier>>&);
 		static std::shared_ptr<interp::ast::Expression> parse_prefix_expression(Parser *);
 		static std::shared_ptr<interp::ast::Expression> parse_infix_expression(Parser *, std::shared_ptr<interp::ast::Expression> left);
 
 		bool current_token_is(interp::token::TokenType type);
 		bool peek_token_is(interp::token::TokenType type);
 		bool expect_peek(interp::token::TokenType type);
+		void current_error(interp::token::TokenType type);
 		void peek_error(interp::token::TokenType type);
 		void no_prefix_parse_fn_error(interp::token::TokenType type);
 		Precidence peek_precidence();

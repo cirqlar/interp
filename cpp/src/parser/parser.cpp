@@ -29,6 +29,7 @@ namespace interp::parser
 		this->prefix_parse_fns[interp::token::LPAREN] = this->parse_grouped_expression;
 		this->prefix_parse_fns[interp::token::IF] = this->parse_if_expression;
 		this->prefix_parse_fns[interp::token::LBRACE] = this->parse_block_expression;
+		this->prefix_parse_fns[interp::token::FUNCTION] = this->parse_function_literal;
 
 		this->infix_parse_fns[interp::token::EQUAL] = this->parse_infix_expression;
 		this->infix_parse_fns[interp::token::NOTEQUAL] = this->parse_infix_expression;
@@ -257,6 +258,50 @@ namespace interp::parser
 		return block;
 	}
 
+	std::shared_ptr<interp::ast::Expression> Parser::parse_function_literal(Parser *p)
+	{
+		auto current_token = p->current_token;
+
+		if (!p->expect_peek(interp::token::LPAREN))
+		{
+			return nullptr;
+		}
+
+		auto if_lit = std::shared_ptr<interp::ast::FunctionLiteral>(
+			new interp::ast::FunctionLiteral(current_token)
+		);
+		p->parse_function_parameters(if_lit->params);
+
+		p->next_token();
+
+		if_lit->body = p->parse_expression(Precidence::LOWEST);
+		
+		return if_lit;
+	}
+
+	void Parser::parse_function_parameters(std::vector<std::shared_ptr<interp::ast::Identifier>>& out_params)
+	{
+		if (this->peek_token_is(interp::token::RPAREN))
+		{
+			this->next_token();
+			return;
+		}
+
+		do
+		{
+			this->next_token();
+			out_params.push_back(std::shared_ptr<interp::ast::Identifier>(
+				new interp::ast::Identifier(this->current_token, this->current_token.literal)
+			));
+			this->next_token();
+		} while (this->current_token_is(interp::token::COMMA));
+
+		if (!this->current_token_is(interp::token::RPAREN))
+		{
+			this->current_error(interp::token::RPAREN);
+		}
+	}
+
 	std::shared_ptr<interp::ast::Expression> Parser::parse_prefix_expression(Parser *p)
 	{
 		auto current_token = p->current_token;
@@ -307,6 +352,11 @@ namespace interp::parser
 			this->peek_error(type);
 			return false;
 		}
+	}
+
+	void Parser::current_error(interp::token::TokenType type)
+	{
+		this->errors.push_back("Expected current token to be " + type + ", got " + this->current_token.type + " instead");
 	}
 
 	void Parser::peek_error(interp::token::TokenType type)

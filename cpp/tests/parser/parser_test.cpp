@@ -556,6 +556,211 @@ TEST(ParserTest, TestIfElseIfExpression)
 	}
 }
 
+TEST(ParserTest, TestFunctionLiteralWithBlock)
+{
+	std::string input = "fn(x, y) { x - y; }";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::FunctionLiteral* fnLit = dynamic_cast<interp::ast::FunctionLiteral*>(expstmnt->expression.get()))
+		{
+			ASSERT_EQ(2, fnLit->params.size())
+				<< "fn params does not contain 2 identifiers, got=" << std::to_string(fnLit->params.size());
+
+			test_identifier(fnLit->params[0], "x");
+			test_identifier(fnLit->params[1], "y");
+
+
+			if (interp::ast::BlockExpression* fnBody = dynamic_cast<interp::ast::BlockExpression*>(fnLit->body.get()))
+			{
+				ASSERT_EQ(1, fnBody->statements.size())
+					<< "consequence.statements does not contain 1 statement. got=" << std::to_string(fnBody->statements.size());
+
+				if (interp::ast::ExpressionStatement* fnExpr = dynamic_cast<interp::ast::ExpressionStatement*>(fnBody->statements[0].get()))
+				{
+					if (interp::ast::InfixExpression* fnStmnt = dynamic_cast<interp::ast::InfixExpression*>(fnExpr->expression.get()))
+					{
+						test_identifier(fnStmnt->left, "x");
+
+						EXPECT_EQ("-", fnStmnt->p_operator) << "operatior not - got " << fnStmnt->p_operator;
+
+						test_identifier(fnStmnt->right, "y");
+					}
+					else
+					{
+						EXPECT_TRUE(false) << "expression not InfixExpression";
+					}
+				}
+				else
+				{
+					EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+				}
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not BlockExpression";
+			}
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not FunctionLiteral";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestFunctionLiteralTwoParams)
+{
+	std::string input = "fn(x, y) x - y";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::FunctionLiteral* fnLit = dynamic_cast<interp::ast::FunctionLiteral*>(expstmnt->expression.get()))
+		{
+			ASSERT_EQ(2, fnLit->params.size())
+				<< "fn params does not contain 2 identifiers, got=" << std::to_string(fnLit->params.size());
+
+			test_identifier(fnLit->params[0], "x");
+			test_identifier(fnLit->params[1], "y");
+
+
+			if (interp::ast::InfixExpression* fnStmnt = dynamic_cast<interp::ast::InfixExpression*>(fnLit->body.get()))
+			{
+				test_identifier(fnStmnt->left, "x");
+
+				EXPECT_EQ("-", fnStmnt->p_operator) << "operatior not - got " << fnStmnt->p_operator;
+
+				test_identifier(fnStmnt->right, "y");
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not FunctionLiteral";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestFunctionLiteralNoParams)
+{
+	std::string input = "fn() x - y";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::FunctionLiteral* fnLit = dynamic_cast<interp::ast::FunctionLiteral*>(expstmnt->expression.get()))
+		{
+			ASSERT_EQ(0, fnLit->params.size())
+				<< "fn params does not contain 2 identifiers, got=" << std::to_string(fnLit->params.size());
+
+
+			if (interp::ast::InfixExpression* fnStmnt = dynamic_cast<interp::ast::InfixExpression*>(fnLit->body.get()))
+			{
+				test_identifier(fnStmnt->left, "x");
+
+				EXPECT_EQ("-", fnStmnt->p_operator) << "operatior not - got " << fnStmnt->p_operator;
+
+				test_identifier(fnStmnt->right, "y");
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not FunctionLiteral";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
+TEST(ParserTest, TestFunctionLiteralOneParam)
+{
+	std::string input = "fn(x) x - y";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (interp::ast::FunctionLiteral* fnLit = dynamic_cast<interp::ast::FunctionLiteral*>(expstmnt->expression.get()))
+		{
+			ASSERT_EQ(1, fnLit->params.size())
+				<< "fn params does not contain 1 identifiers, got=" << std::to_string(fnLit->params.size());
+
+			test_identifier(fnLit->params[0], "x");
+
+
+			if (interp::ast::InfixExpression* fnStmnt = dynamic_cast<interp::ast::InfixExpression*>(fnLit->body.get()))
+			{
+				test_identifier(fnStmnt->left, "x");
+
+				EXPECT_EQ("-", fnStmnt->p_operator) << "operatior not - got " << fnStmnt->p_operator;
+
+				test_identifier(fnStmnt->right, "y");
+			}
+			else
+			{
+				EXPECT_TRUE(false) << "expression not InfixExpression";
+			}
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not FunctionLiteral";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
 void check_parser_errors(interp::parser::Parser p)
 {
 	auto errors = p.get_errors();
