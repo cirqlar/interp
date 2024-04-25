@@ -3,7 +3,7 @@
 namespace interp::ast
 {
 	BlockExpression::BlockExpression(interp::token::Token token)
-		: token(), statements({})
+		: token(token), statements({})
 	{
 	}
 

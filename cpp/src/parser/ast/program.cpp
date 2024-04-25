@@ -21,9 +21,14 @@ namespace interp::ast
 	std::string Program::string()
 	{
 		std::string out;
-		for (auto stmnt : this->statements)
+		for (size_t i = 0; i < this->statements.size(); i++)
 		{
-			out += stmnt->string() + '\n';
+			out += this->statements[i]->string();
+
+			if (i < this->statements.size() - 1)
+			{
+				out += '\n';
+			}
 		}
 
 		return out;
