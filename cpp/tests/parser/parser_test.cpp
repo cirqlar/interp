@@ -142,7 +142,7 @@ TEST(ParserTest, TestBooleanExpression)
 
 	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
 	{
-		if (interp::ast::Boolean* ident = dynamic_cast<interp::ast::Boolean*>(expstmnt->expression.get()))
+		if (interp::ast::BooleanLiteral* ident = dynamic_cast<interp::ast::BooleanLiteral*>(expstmnt->expression.get()))
 		{
 			EXPECT_EQ(true, ident->value) << "value not true got " << ident->value;
 			EXPECT_EQ("true", ident->token_literal()) << "token literal not true got " << ident->token_literal();
@@ -948,7 +948,7 @@ void test_identifier(std::shared_ptr<interp::ast::Expression> expr, std::string 
 
 void test_boolean(std::shared_ptr<interp::ast::Expression> expr, bool value)
 {
-	if (interp::ast::Boolean* boolean = dynamic_cast<interp::ast::Boolean*>(expr.get()))
+	if (interp::ast::BooleanLiteral* boolean = dynamic_cast<interp::ast::BooleanLiteral*>(expr.get()))
 	{
 		EXPECT_EQ(value, boolean->value) << "value not " << value << " got " << boolean->value;
 		EXPECT_EQ(value ? "true" : "false", boolean->token_literal()) 
