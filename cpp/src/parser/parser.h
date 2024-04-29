@@ -11,7 +11,7 @@
 
 namespace interp::parser
 {
-	enum Precidence
+	enum struct Precidence
 	{
 		LOWEST,
 		EQUALS,		 // ==

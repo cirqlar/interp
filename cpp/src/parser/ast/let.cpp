@@ -24,4 +24,9 @@ namespace interp::ast
 		out += ";";
 		return out;
 	}
+
+	NodeType LetStatement::type()
+	{
+		return NodeType::LetStatment;
+	}
 }

@@ -11,7 +11,7 @@ namespace interp::token {
 		std::pair("return", RETURN),
 	});
 
-	std::string lookup_ident(std::string literal)
+	TokenType lookup_ident(std::string literal)
 	{
 		if (keywords.find(literal) == keywords.end()) {
 			return IDENT;

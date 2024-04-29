@@ -5,16 +5,17 @@
 
 namespace interp::ast
 {
-	class Boolean : public Expression
+	class BooleanLiteral : public Expression
 	{
 	public:
-		Boolean(interp::token::Token token, bool value);
-		~Boolean() = default;
+		BooleanLiteral(interp::token::Token token, bool value);
+		~BooleanLiteral() = default;
 
 		interp::token::Token token;
 		bool value;
 
 		std::string token_literal() override;
 		std::string string() override;
+		NodeType type() override;
 	};
 }

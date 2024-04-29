@@ -23,4 +23,9 @@ namespace interp::ast
 
 		return out;
 	}
+
+	NodeType BlockExpression::type()
+	{
+		return NodeType::BlockExpression;
+	}
 }

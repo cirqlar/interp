@@ -13,7 +13,7 @@ namespace interp::token
 		std::string literal;
 	};
 
-	const std::string
+	const TokenType
 		ILLEGAL = "ILLEGAL",
 		L_EOF = "EOF",
 
@@ -53,5 +53,5 @@ namespace interp::token
 		ELSE = "ELSE",
 		RETURN = "RETURN";
 
-	std::string lookup_ident(std::string literal);
+	TokenType lookup_ident(std::string literal);
 }

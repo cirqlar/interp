@@ -18,5 +18,6 @@ namespace interp::ast
 
 		std::string token_literal() override;
 		std::string string() override;
+		NodeType type() override;
 	};
 }

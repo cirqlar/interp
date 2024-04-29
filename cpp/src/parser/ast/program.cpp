@@ -33,4 +33,9 @@ namespace interp::ast
 
 		return out;
 	}
+
+	NodeType Program::type()
+	{
+		return NodeType::Program;
+	}
 }

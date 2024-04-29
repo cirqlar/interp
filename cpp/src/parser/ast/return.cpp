@@ -22,4 +22,9 @@ namespace interp::ast
 		out += ";";
 		return out;
 	}
+
+	NodeType ReturnStatement::type()
+	{
+		return NodeType::ReturnStatment;
+	}
 }

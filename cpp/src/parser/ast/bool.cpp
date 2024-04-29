@@ -2,18 +2,23 @@
 
 namespace interp::ast
 {
-	Boolean::Boolean(interp::token::Token token, bool value)
+	BooleanLiteral::BooleanLiteral(interp::token::Token token, bool value)
 		: token(token), value(value)
 	{
 	}
 
-	std::string Boolean::token_literal()
+	std::string BooleanLiteral::token_literal()
 	{
 		return this->token.literal;
 	}
 
-	std::string Boolean::string()
+	std::string BooleanLiteral::string()
 	{
 		return this->token.literal;
+	}
+
+	NodeType BooleanLiteral::type()
+	{
+		return NodeType::BooleanExpression;
 	}
 }

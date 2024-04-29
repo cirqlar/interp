@@ -23,4 +23,9 @@ namespace interp::ast
 			return "";
 		}
 	}
+
+	NodeType ExpressionStatement::type()
+	{
+		return NodeType::ExpressionStatment;
+	}
 }

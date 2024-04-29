@@ -137,7 +137,7 @@ namespace interp::parser
 	std::shared_ptr<interp::ast::ExpressionStatement> Parser::parse_expression_statement()
 	{
 		auto exprstmnt = std::shared_ptr<interp::ast::ExpressionStatement>(
-			new interp::ast::ExpressionStatement(this->current_token, this->parse_expression(LOWEST)));
+			new interp::ast::ExpressionStatement(this->current_token, this->parse_expression(Precidence::LOWEST)));
 
 		if (this->peek_token_is(interp::token::SEMICOLON))
 		{
@@ -194,8 +194,8 @@ namespace interp::parser
 
 	std::shared_ptr<interp::ast::Expression> Parser::parse_boolean(Parser *p)
 	{
-		return std::shared_ptr<interp::ast::Boolean>(
-			new interp::ast::Boolean(p->current_token, p->current_token_is(interp::token::TRUE)));
+		return std::shared_ptr<interp::ast::BooleanLiteral>(
+			new interp::ast::BooleanLiteral(p->current_token, p->current_token_is(interp::token::TRUE)));
 	}
 
 	std::shared_ptr<interp::ast::Expression> Parser::parse_grouped_expression(Parser *p)
@@ -318,7 +318,7 @@ namespace interp::parser
 			new interp::ast::PrefixExpression(
 				current_token,
 				current_token.literal,
-				p->parse_expression(PREFIX)
+				p->parse_expression(Precidence::PREFIX)
 			)
 		);
 	}

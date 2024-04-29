@@ -15,4 +15,9 @@ namespace interp::ast
 	{
 		return this->value;
 	}
+
+	NodeType Identifier::type()
+	{
+		return NodeType::Identifier;
+	}
 }

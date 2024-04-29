@@ -15,10 +15,11 @@ namespace interp::ast
 		~FunctionLiteral() = default;
 
 		interp::token::Token token;
-		std::vector<std::shared_ptr<interp::ast::Identifier>> params;
+		std::vector<std::shared_ptr<Identifier>> params;
 		std::shared_ptr<interp::ast::Expression> body;
 
 		std::string token_literal() override;
 		std::string string() override;
+		NodeType type() override;
 	};
 }

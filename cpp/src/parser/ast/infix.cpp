@@ -11,8 +11,14 @@ namespace interp::ast
 	{
 		return this->token.literal;
 	}
+
 	std::string InfixExpression::string()
 	{
 		return "(" + this->left->string() + " " + this->token_literal() + " " + this->right->string() + ")";
+	}
+
+	NodeType InfixExpression::type()
+	{
+		return NodeType::InfixExpression;
 	}
 }

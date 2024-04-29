@@ -11,14 +11,15 @@ namespace interp::ast
 	{
 	public:
 		CallExpression(interp::token::Token token);
-		CallExpression(interp::token::Token token, std::shared_ptr<interp::ast::Expression> function);
+		CallExpression(interp::token::Token token, std::shared_ptr<Expression> function);
 		~CallExpression() = default;
 
 		interp::token::Token token;
-		std::shared_ptr<interp::ast::Expression> function;
-		std::vector<std::shared_ptr<interp::ast::Expression>> args;
+		std::shared_ptr<Expression> function;
+		std::vector<std::shared_ptr<Expression>> args;
 
 		std::string token_literal() override;
 		std::string string() override;
+		NodeType type() override;
 	};
 }
