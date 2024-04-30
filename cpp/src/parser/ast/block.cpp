@@ -24,7 +24,7 @@ namespace interp::ast
 		return out;
 	}
 
-	NodeType BlockExpression::type()
+	NodeType BlockExpression::type() const
 	{
 		return NodeType::BlockExpression;
 	}

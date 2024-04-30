@@ -17,7 +17,7 @@ namespace interp::ast
 		return this->token.literal;
 	}
 
-	NodeType BooleanLiteral::type()
+	NodeType BooleanLiteral::type() const
 	{
 		return NodeType::BooleanExpression;
 	}

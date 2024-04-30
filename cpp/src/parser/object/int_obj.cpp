@@ -8,7 +8,7 @@ namespace interp::object
 	{
 	}
 
-	ObjectType Integer::type()
+	ObjectType Integer::type() const
 	{
 		return ObjectType::IntegerObject;
 	}

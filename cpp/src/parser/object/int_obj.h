@@ -12,7 +12,7 @@ namespace interp::object
 
 		int64_t value;
 
-		ObjectType type() override;
+		ObjectType type() const override;
 		std::string inspect() override;
 	};
 }

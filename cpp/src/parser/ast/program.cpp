@@ -34,7 +34,7 @@ namespace interp::ast
 		return out;
 	}
 
-	NodeType Program::type()
+	NodeType Program::type() const
 	{
 		return NodeType::Program;
 	}

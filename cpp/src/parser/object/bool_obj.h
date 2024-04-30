@@ -12,7 +12,7 @@ namespace interp::object
 
 		bool value;
 
-		ObjectType type() override;
+		ObjectType type() const override;
 		std::string inspect() override;
 	};
 }

@@ -25,7 +25,7 @@ namespace interp::ast
 		return out;
 	}
 
-	NodeType LetStatement::type()
+	NodeType LetStatement::type() const
 	{
 		return NodeType::LetStatment;
 	}

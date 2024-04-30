@@ -16,7 +16,7 @@ namespace interp::ast
 		return this->token.literal;
 	}
 
-	NodeType IntegerLiteral::type()
+	NodeType IntegerLiteral::type() const
 	{
 		return NodeType::IntegerLiteral;
 	}

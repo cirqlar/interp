@@ -17,7 +17,7 @@ namespace interp::ast
 		return "(" + this->token_literal() + this->right->string() + ")";
 	}
 
-	NodeType PrefixExpression::type()
+	NodeType PrefixExpression::type() const
 	{
 		return NodeType::PrefixExpression;
 	}

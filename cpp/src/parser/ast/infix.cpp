@@ -17,7 +17,7 @@ namespace interp::ast
 		return "(" + this->left->string() + " " + this->token_literal() + " " + this->right->string() + ")";
 	}
 
-	NodeType InfixExpression::type()
+	NodeType InfixExpression::type() const
 	{
 		return NodeType::InfixExpression;
 	}

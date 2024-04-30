@@ -1,0 +1,178 @@
+#include "eval.h"
+
+namespace interp::eval
+{
+	auto TRUE = std::shared_ptr<interp::object::BooleanObject>(new interp::object::BooleanObject(true));
+	auto FALSE = std::shared_ptr<interp::object::BooleanObject>(new interp::object::BooleanObject(false));
+	auto NULL_OBJ = std::shared_ptr<interp::object::Null>(new interp::object::Null());
+
+	std::shared_ptr<interp::object::Object> eval(const interp::ast::Node* node)
+	{
+		switch (node->type())
+		{
+		case interp::ast::NodeType::Program:
+			if (auto literal = dynamic_cast<const interp::ast::Program*>(node))
+			{
+				return eval_statments(literal->statements);
+			}
+			return nullptr;
+		case interp::ast::NodeType::BlockExpression:
+			if (auto literal = dynamic_cast<const interp::ast::BlockExpression*>(node))
+			{
+				return eval_statments(literal->statements);
+			}
+			return nullptr;
+		case interp::ast::NodeType::BooleanExpression:
+			if (auto literal = dynamic_cast<const interp::ast::BooleanLiteral*>(node))
+			{
+				return literal->value ? TRUE : FALSE;
+			}
+			return nullptr;
+			//case interp::ast::NodeType::CallExpression:
+			//	break;
+		case interp::ast::NodeType::ExpressionStatment:
+			if (auto literal = dynamic_cast<const interp::ast::ExpressionStatement*>(node))
+			{
+				return eval(literal->expression.get());
+			}
+			return nullptr;
+			//case interp::ast::NodeType::FunctionLiteral:
+			//	break;
+			//case interp::ast::NodeType::Identifier:
+			//	break;
+			//case interp::ast::NodeType::IfExpression:
+			//	break;
+		case interp::ast::NodeType::InfixExpression:
+			if (auto literal = dynamic_cast<const interp::ast::InfixExpression*>(node))
+			{
+				auto left = eval(literal->left.get());
+				auto right = eval(literal->right.get());
+				return eval_infix(literal->p_operator, left, right);
+			}
+			return nullptr;
+		case interp::ast::NodeType::IntegerLiteral:
+			if (auto literal = dynamic_cast<const interp::ast::IntegerLiteral*>(node))
+			{
+
+				return std::shared_ptr<interp::object::Integer>(new interp::object::Integer(literal->value));
+			}
+			return nullptr;
+			//case interp::ast::NodeType::LetStatment:
+			//	break;
+		case interp::ast::NodeType::PrefixExpression:
+			if (auto literal = dynamic_cast<const interp::ast::PrefixExpression*>(node))
+			{
+				auto right = eval(literal->right.get());
+				return eval_prefix(literal->p_operator, right);
+			}
+			return nullptr;
+			//case interp::ast::NodeType::ReturnStatment:
+			//	break;
+		default:
+			return nullptr;
+		}
+	}
+
+	std::shared_ptr<interp::object::Object> eval_statments(const std::vector<std::shared_ptr<interp::ast::Statement>>& statements)
+	{
+		std::shared_ptr<interp::object::Object> result = nullptr;
+
+		for (auto& statement : statements)
+		{
+			result = eval(statement.get());
+		}
+
+		return result;
+	}
+
+	std::shared_ptr<interp::object::Object> eval_prefix(std::string op, const std::shared_ptr<interp::object::Object> right)
+	{
+		if (op == "!")
+			return eval_bang(right);
+		else if (op == "-")
+			return eval_minus(right);
+		else
+			return NULL_OBJ;
+	}
+
+	std::shared_ptr<interp::object::Object> eval_bang(const std::shared_ptr<interp::object::Object> right)
+	{
+		switch (right->type())
+		{
+		case interp::object::ObjectType::BooleanObject:
+			if (auto bool_obj = dynamic_cast<interp::object::BooleanObject*>(right.get()))
+			{
+				return bool_obj->value ? FALSE : TRUE;
+			}
+			[[fallthrough]];
+		case interp::object::ObjectType::NullObject:
+			return TRUE;
+		default:
+			return FALSE;
+		}
+	}
+
+	std::shared_ptr<interp::object::Object> eval_minus(const std::shared_ptr<interp::object::Object> right)
+	{
+		switch (right->type())
+		{
+		case interp::object::ObjectType::IntegerObject:
+			if (auto int_obj = dynamic_cast<interp::object::Integer*>(right.get()))
+			{
+				return std::shared_ptr<interp::object::Integer>(new interp::object::Integer(-int_obj->value));
+			}
+			[[fallthrough]];
+		default:
+			return NULL_OBJ;
+		}
+	}
+
+	std::shared_ptr<interp::object::Object> eval_infix(std::string op, const std::shared_ptr<interp::object::Object> left, const std::shared_ptr<interp::object::Object> right)
+	{
+		if (left->type() == right->type() && right->type() == interp::object::ObjectType::IntegerObject)
+			return eval_int_infix(op, left, right);
+		else if (op == "==")
+			return left == right ? TRUE : FALSE;
+		else if (op == "!=")
+			return left != right ? TRUE : FALSE;
+		else
+			return NULL_OBJ;
+	}
+
+	std::shared_ptr<interp::object::Object> eval_int_infix(std::string op, const std::shared_ptr<interp::object::Object> left, const std::shared_ptr<interp::object::Object> right)
+	{
+		if (auto right_obj = dynamic_cast<interp::object::Integer*>(right.get()))
+		{
+			if (auto left_obj = dynamic_cast<interp::object::Integer*>(left.get()))
+			{
+				int64_t result = 0;
+				if (op == "-")
+					result = left_obj->value - right_obj->value;
+				else if (op == "+")
+					result = left_obj->value + right_obj->value;
+				else if (op == "*")
+					result = left_obj->value * right_obj->value;
+				else if (op == "/")
+					result = left_obj->value / right_obj->value;
+				else if (op == "<")
+					return left_obj->value < right_obj->value ? TRUE : FALSE;
+				else if (op == ">")
+					return left_obj->value > right_obj->value ? TRUE : FALSE;
+				else if (op == "<=")
+					return left_obj->value <= right_obj->value ? TRUE : FALSE;
+				else if (op == ">=")
+					return left_obj->value >= right_obj->value ? TRUE : FALSE;
+				else if (op == "==")
+					return left_obj->value == right_obj->value ? TRUE : FALSE;
+				else if (op == "!=")
+					return left_obj->value != right_obj->value ? TRUE : FALSE;
+				else
+					return NULL_OBJ;
+				
+				return std::shared_ptr<interp::object::Integer>(new interp::object::Integer(result));
+			}
+		}
+		
+		return NULL_OBJ;
+	}
+}

@@ -2,7 +2,7 @@
 
 namespace interp::object
 {
-	ObjectType Null::type()
+	ObjectType Null::type() const
 	{
 		return ObjectType::NullObject;
 	}

@@ -24,7 +24,7 @@ namespace interp::ast
 		return out;
 	}
 
-	NodeType IfExpression::type()
+	NodeType IfExpression::type() const
 	{
 		return NodeType::IfExpression;
 	}

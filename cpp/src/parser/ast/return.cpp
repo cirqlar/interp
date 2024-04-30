@@ -23,7 +23,7 @@ namespace interp::ast
 		return out;
 	}
 
-	NodeType ReturnStatement::type()
+	NodeType ReturnStatement::type() const
 	{
 		return NodeType::ReturnStatment;
 	}

@@ -35,7 +35,7 @@ namespace interp::ast
 		return out;
 	}
 
-	NodeType FunctionLiteral::type()
+	NodeType FunctionLiteral::type() const
 	{
 		return NodeType::FunctionLiteral;
 	}

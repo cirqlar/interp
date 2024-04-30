@@ -30,7 +30,7 @@ namespace interp::ast
 
 		virtual std::string token_literal() = 0;
 		virtual std::string string() = 0;
-		virtual NodeType type() = 0;
+		virtual NodeType type() const = 0;
 	};
 
 	class Expression : public Node

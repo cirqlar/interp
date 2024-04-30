@@ -21,7 +21,9 @@ add_library(interp_parser STATIC
 	"object/int_obj.cpp"
 	"object/bool_obj.cpp"
 	"object/null_obj.cpp"
- )
+	
+	"eval.cpp"
+)
 target_include_directories(interp_parser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(interp_parser PUBLIC interp_lexer)
 

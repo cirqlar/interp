@@ -16,7 +16,7 @@ namespace interp::ast
 		return this->value;
 	}
 
-	NodeType Identifier::type()
+	NodeType Identifier::type() const
 	{
 		return NodeType::Identifier;
 	}

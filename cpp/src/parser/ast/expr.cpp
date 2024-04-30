@@ -24,7 +24,7 @@ namespace interp::ast
 		}
 	}
 
-	NodeType ExpressionStatement::type()
+	NodeType ExpressionStatement::type() const
 	{
 		return NodeType::ExpressionStatment;
 	}

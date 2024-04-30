@@ -35,7 +35,7 @@ namespace interp::ast
 		return out;
 	}
 
-	NodeType CallExpression::type()
+	NodeType CallExpression::type() const
 	{
 		return NodeType::CallExpression;
 	}

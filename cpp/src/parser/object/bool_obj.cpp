@@ -7,7 +7,7 @@ namespace interp::object
 	{
 	}
 
-	ObjectType BooleanObject::type()
+	ObjectType BooleanObject::type() const
 	{
 		return ObjectType::BooleanObject;
 	}

@@ -18,7 +18,7 @@ namespace interp::object
 	public:
 		virtual ~Object() = default;
 
-		virtual ObjectType type() = 0;
+		virtual ObjectType type() const = 0;
 		virtual std::string inspect() = 0;
 	};
 }

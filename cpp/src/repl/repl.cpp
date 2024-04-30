@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "repl.h"
+#include "eval.h"
 
 namespace interp::repl
 {
@@ -28,10 +29,14 @@ namespace interp::repl
 				{
 					std::cout << '\t' << error << '\n';
 				}
+				input.clear();
+				continue;
 			}
-			else
+			
+			auto evaluated = interp::eval::eval(prog.get());
+			if (evaluated)
 			{
-				std::cout << prog->string() << '\n';
+				std::cout << evaluated->inspect() << '\n';
 			}
 
 			input.clear();
