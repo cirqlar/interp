@@ -9,6 +9,7 @@ namespace interp::object
 		IntegerObject,
 		BooleanObject,
 		NullObject,
+		ReturnObject,
 	};
 
 	std::string object_type_to_string(ObjectType object_type);

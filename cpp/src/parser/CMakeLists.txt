@@ -23,7 +23,7 @@ add_library(interp_parser STATIC
 	"object/null_obj.cpp"
 	
 	"eval.cpp"
-)
+ "object/return_obj.h" "object/return_obj.cpp")
 target_include_directories(interp_parser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(interp_parser PUBLIC interp_lexer)
 

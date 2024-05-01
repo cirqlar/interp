@@ -12,6 +12,8 @@ namespace interp::object
 			return "BooleanObject";
 		case interp::object::ObjectType::NullObject:
 			return "NullObject";
+		case interp::object::ObjectType::ReturnObject:
+			return "ReturnObject";
 		default:
 			return "Unknown Type";
 		}

@@ -13,7 +13,7 @@ namespace interp::eval
 		case interp::ast::NodeType::Program:
 			if (auto literal = dynamic_cast<const interp::ast::Program*>(node))
 			{
-				return eval_statments(literal->statements);
+				return eval_statments(literal->statements, true);
 			}
 			return nullptr;
 		case interp::ast::NodeType::BlockExpression:
@@ -40,8 +40,12 @@ namespace interp::eval
 			//	break;
 			//case interp::ast::NodeType::Identifier:
 			//	break;
-			//case interp::ast::NodeType::IfExpression:
-			//	break;
+		case interp::ast::NodeType::IfExpression:
+			if (auto literal = dynamic_cast<const interp::ast::IfExpression*>(node))
+			{
+				return eval_if(literal);
+			}
+			return nullptr;
 		case interp::ast::NodeType::InfixExpression:
 			if (auto literal = dynamic_cast<const interp::ast::InfixExpression*>(node))
 			{
@@ -66,20 +70,38 @@ namespace interp::eval
 				return eval_prefix(literal->p_operator, right);
 			}
 			return nullptr;
-			//case interp::ast::NodeType::ReturnStatment:
-			//	break;
+		case interp::ast::NodeType::ReturnStatment:
+			if (auto literal = dynamic_cast<const interp::ast::ReturnStatement*>(node))
+			{
+				return std::shared_ptr<interp::object::ReturnObject>(
+					new interp::object::ReturnObject( eval(literal->return_value.get()) ));
+			}
+			return nullptr;
 		default:
 			return nullptr;
 		}
 	}
 
-	std::shared_ptr<interp::object::Object> eval_statments(const std::vector<std::shared_ptr<interp::ast::Statement>>& statements)
+	std::shared_ptr<interp::object::Object> eval_statments(const std::vector<std::shared_ptr<interp::ast::Statement>>& statements, bool unwrap_return)
 	{
 		std::shared_ptr<interp::object::Object> result = nullptr;
 
 		for (auto& statement : statements)
 		{
 			result = eval(statement.get());
+
+			if (result->type() == interp::object::ObjectType::ReturnObject)
+			{
+				if (!unwrap_return)
+				{
+					return result;
+				}
+
+				if (auto r_obj = dynamic_cast<const interp::object::ReturnObject*>(result.get()))
+				{
+					return r_obj->value;
+				}
+			}
 		}
 
 		return result;
@@ -174,5 +196,36 @@ namespace interp::eval
 		}
 		
 		return NULL_OBJ;
+	}
+
+	std::shared_ptr<interp::object::Object> eval_if(const interp::ast::IfExpression* ifExpr)
+	{
+		auto condition = eval(ifExpr->condition.get());
+
+		if (is_truthy(condition))
+		{
+			return eval(ifExpr->consequence.get());
+		}
+		else if (ifExpr->alternative)
+		{
+			return eval(ifExpr->alternative.get());
+		}
+		else
+		{
+			return NULL_OBJ;
+		}
+	}
+
+	bool is_truthy(const std::shared_ptr<interp::object::Object> obj)
+	{
+		switch (obj->type())
+		{
+		case interp::object::ObjectType::BooleanObject:
+			return obj == TRUE;
+		case interp::object::ObjectType::NullObject:
+			return false;
+		default:
+			return true;
+		}
 	}
 }

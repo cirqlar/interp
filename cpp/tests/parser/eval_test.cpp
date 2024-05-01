@@ -7,6 +7,7 @@
 std::shared_ptr<interp::object::Object> test_eval(std::string input);
 bool test_int_obj(const interp::object::Object* in_object, int64_t expected);
 bool test_bool_obj(const interp::object::Object* in_object, bool expected);
+bool test_null_obj(const interp::object::Object* in_object);
 
 TEST(EvalTest, TestEvalIntegerExpression)
 {
@@ -26,6 +27,12 @@ TEST(EvalTest, TestEvalIntegerExpression)
 		std::pair("3 * 3 * 3 + 10", 37),
 		std::pair("3 * (3 * 3) + 10", 37),
 		std::pair("(5 + 10 * 2 + 15 / 3) * 2 + -10", 50),
+
+		std::pair("return 10;", 10),
+		std::pair("return 10; 9;", 10),
+		std::pair("return 2 * 5; 9;", 10),
+		std::pair("9; return 2 * 5; 9;", 10),
+		std::pair("if (10 > 1) { if (10 > 1) { return 10; } return 1; }", 10),
 	};
 
 	for (auto& tt : expected)
@@ -91,6 +98,42 @@ TEST(EvalTest, TestBangOperator)
 	}
 }
 
+TEST(EvalTest, TestIfElseExpressions)
+{
+	auto NULL_OBJ = std::shared_ptr<interp::object::Null>(new interp::object::Null());
+	auto FIVE_OBJ = std::shared_ptr<interp::object::Integer>(new interp::object::Integer(5));
+	auto FIFTEEN_OBJ = std::shared_ptr<interp::object::Integer>(new interp::object::Integer(15));
+
+	std::pair<std::string, std::shared_ptr<interp::object::Object>> expected[] = {
+		std::pair("if (true) { 5 }", FIVE_OBJ),
+		std::pair("if (false) { 5 }", NULL_OBJ),
+		std::pair("if (1) { 5 }", FIVE_OBJ),
+		std::pair("if (1 < 2) { 5 }", FIVE_OBJ),
+		std::pair("if (1 > 2) { 5 }", NULL_OBJ),
+		std::pair("if (1 > 2) { 5 } else { 15 }", FIFTEEN_OBJ),
+		std::pair("if (1 < 2) { 5 } else { 15 }", FIVE_OBJ),
+	};
+
+	for (auto& tt : expected)
+	{
+		auto obj = test_eval(tt.first);
+
+		switch (tt.second->type())
+		{
+		case interp::object::ObjectType::IntegerObject:
+			test_int_obj(obj.get(), tt.second == FIVE_OBJ ? 5 : 15);
+			continue;
+		/*case interp::object::ObjectType::BooleanObject:
+			break;*/
+		case interp::object::ObjectType::NullObject:
+			test_null_obj(obj.get());
+			continue;
+		default:
+			continue;
+		}
+	}
+}
+
 std::shared_ptr<interp::object::Object> test_eval(std::string input)
 {
 	interp::lexer::Lexer lex(input);
@@ -103,7 +146,7 @@ std::shared_ptr<interp::object::Object> test_eval(std::string input)
 
 bool test_int_obj(const interp::object::Object* in_object, int64_t expected)
 {
-	if (const interp::object::Integer* obj = dynamic_cast<const interp::object::Integer*>(in_object))
+	if (auto obj = dynamic_cast<const interp::object::Integer*>(in_object))
 	{
 		if (obj->value != expected)
 		{
@@ -122,7 +165,7 @@ bool test_int_obj(const interp::object::Object* in_object, int64_t expected)
 
 bool test_bool_obj(const interp::object::Object* in_object, bool expected)
 {
-	if (const interp::object::BooleanObject* obj = dynamic_cast<const interp::object::BooleanObject*>(in_object))
+	if (auto obj = dynamic_cast<const interp::object::BooleanObject*>(in_object))
 	{
 		if (obj->value != expected)
 		{
@@ -139,3 +182,16 @@ bool test_bool_obj(const interp::object::Object* in_object, bool expected)
 	}
 }
 
+
+bool test_null_obj(const interp::object::Object* in_object)
+{
+	if (auto obj = dynamic_cast<const interp::object::Null*>(in_object))
+	{
+		return true;
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "Object is not an Null, type is " << interp::object::object_type_to_string(in_object->type());
+		return false;
+	}
+}
