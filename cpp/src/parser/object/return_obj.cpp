@@ -12,7 +12,7 @@ namespace interp::object
 		return ObjectType::ReturnObject;
 	}
 
-	std::string ReturnObject::inspect()
+	std::string ReturnObject::inspect() const
 	{
 		return this->value->inspect();
 	}

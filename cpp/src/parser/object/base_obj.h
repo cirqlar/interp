@@ -10,6 +10,7 @@ namespace interp::object
 		BooleanObject,
 		NullObject,
 		ReturnObject,
+		ErrorObject,
 	};
 
 	std::string object_type_to_string(ObjectType object_type);
@@ -20,6 +21,6 @@ namespace interp::object
 		virtual ~Object() = default;
 
 		virtual ObjectType type() const = 0;
-		virtual std::string inspect() = 0;
+		virtual std::string inspect() const = 0;
 	};
 }

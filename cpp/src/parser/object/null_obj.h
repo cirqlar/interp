@@ -11,6 +11,6 @@ namespace interp::object
 		~Null() = default;
 
 		ObjectType type() const override;
-		std::string inspect() override;
+		std::string inspect() const override;
 	};
 }

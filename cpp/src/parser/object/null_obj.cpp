@@ -7,7 +7,7 @@ namespace interp::object
 		return ObjectType::NullObject;
 	}
 
-	std::string Null::inspect()
+	std::string Null::inspect() const
 	{
 		return "null";
 	}

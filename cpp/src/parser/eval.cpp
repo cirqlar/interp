@@ -50,7 +50,11 @@ namespace interp::eval
 			if (auto literal = dynamic_cast<const interp::ast::InfixExpression*>(node))
 			{
 				auto left = eval(literal->left.get());
+				if (is_error(left))
+					return left;
 				auto right = eval(literal->right.get());
+				if (is_error(right))
+					return right;
 				return eval_infix(literal->p_operator, left, right);
 			}
 			return nullptr;
@@ -67,14 +71,19 @@ namespace interp::eval
 			if (auto literal = dynamic_cast<const interp::ast::PrefixExpression*>(node))
 			{
 				auto right = eval(literal->right.get());
+				if (is_error(right))
+					return right;
 				return eval_prefix(literal->p_operator, right);
 			}
 			return nullptr;
 		case interp::ast::NodeType::ReturnStatment:
 			if (auto literal = dynamic_cast<const interp::ast::ReturnStatement*>(node))
 			{
+				auto inner = eval(literal->return_value.get());
+				if (is_error(inner))
+					return inner;
 				return std::shared_ptr<interp::object::ReturnObject>(
-					new interp::object::ReturnObject( eval(literal->return_value.get()) ));
+					new interp::object::ReturnObject( inner ));
 			}
 			return nullptr;
 		default:
@@ -102,6 +111,10 @@ namespace interp::eval
 					return r_obj->value;
 				}
 			}
+			else if (result->type() == interp::object::ObjectType::ErrorObject)
+			{
+				return result;
+			}
 		}
 
 		return result;
@@ -114,7 +127,7 @@ namespace interp::eval
 		else if (op == "-")
 			return eval_minus(right);
 		else
-			return NULL_OBJ;
+			return new_error("unknown operator: " + op + interp::object::object_type_to_string(right->type()));
 	}
 
 	std::shared_ptr<interp::object::Object> eval_bang(const std::shared_ptr<interp::object::Object> right)
@@ -145,7 +158,7 @@ namespace interp::eval
 			}
 			[[fallthrough]];
 		default:
-			return NULL_OBJ;
+			return new_error("unknown operator: -" + interp::object::object_type_to_string(right->type()));
 		}
 	}
 
@@ -153,12 +166,20 @@ namespace interp::eval
 	{
 		if (left->type() == right->type() && right->type() == interp::object::ObjectType::IntegerObject)
 			return eval_int_infix(op, left, right);
+		else if (left->type() != right->type())
+			return new_error("type mismatch: "
+				+ interp::object::object_type_to_string(left->type())
+				+ " " + op + " "
+				+ interp::object::object_type_to_string(right->type()));
 		else if (op == "==")
 			return left == right ? TRUE : FALSE;
 		else if (op == "!=")
 			return left != right ? TRUE : FALSE;
 		else
-			return NULL_OBJ;
+			return new_error("unknown operator: " 
+				+ interp::object::object_type_to_string(left->type())
+				+ " " + op + " "
+				+ interp::object::object_type_to_string(right->type()));
 	}
 
 	std::shared_ptr<interp::object::Object> eval_int_infix(std::string op, const std::shared_ptr<interp::object::Object> left, const std::shared_ptr<interp::object::Object> right)
@@ -189,18 +210,26 @@ namespace interp::eval
 				else if (op == "!=")
 					return left_obj->value != right_obj->value ? TRUE : FALSE;
 				else
-					return NULL_OBJ;
+					return new_error("unknown operator: "
+						+ interp::object::object_type_to_string(left_obj->type())
+						+ " " + op + " "
+						+ interp::object::object_type_to_string(right_obj->type()));
 				
 				return std::shared_ptr<interp::object::Integer>(new interp::object::Integer(result));
 			}
 		}
 		
-		return NULL_OBJ;
+		return new_error("unknown operator: "
+			+ interp::object::object_type_to_string(left->type())
+			+ " " + op + " "
+			+ interp::object::object_type_to_string(right->type()));
 	}
 
 	std::shared_ptr<interp::object::Object> eval_if(const interp::ast::IfExpression* ifExpr)
 	{
 		auto condition = eval(ifExpr->condition.get());
+		if (is_error(condition))
+			return condition;
 
 		if (is_truthy(condition))
 		{
@@ -227,5 +256,15 @@ namespace interp::eval
 		default:
 			return true;
 		}
+	}
+
+	std::shared_ptr<interp::object::ErrorObject> new_error(std::string message)
+	{
+		return std::shared_ptr<interp::object::ErrorObject>(new interp::object::ErrorObject(message));
+	}
+
+	bool is_error(const std::shared_ptr<interp::object::Object> obj)
+	{
+		return obj->type() == interp::object::ObjectType::ErrorObject;
 	}
 }

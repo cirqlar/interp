@@ -15,4 +15,6 @@ namespace interp::eval
 	std::shared_ptr<interp::object::Object> eval_int_infix(std::string op, const std::shared_ptr<interp::object::Object> left, const std::shared_ptr<interp::object::Object> right);
 	std::shared_ptr<interp::object::Object> eval_if(const interp::ast::IfExpression* ifExpr);
 	bool is_truthy(const std::shared_ptr<interp::object::Object> obj);
+	std::shared_ptr<interp::object::ErrorObject> new_error(std::string message);
+	bool is_error(const std::shared_ptr<interp::object::Object> obj);
 }

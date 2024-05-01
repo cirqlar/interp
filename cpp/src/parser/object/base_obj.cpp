@@ -7,13 +7,15 @@ namespace interp::object
 		switch (object_type)
 		{
 		case interp::object::ObjectType::IntegerObject:
-			return "IntegerObject";
+			return "INTEGER";
 		case interp::object::ObjectType::BooleanObject:
-			return "BooleanObject";
+			return "BOOLEAN";
 		case interp::object::ObjectType::NullObject:
-			return "NullObject";
+			return "NULL";
 		case interp::object::ObjectType::ReturnObject:
 			return "ReturnObject";
+		case interp::object::ObjectType::ErrorObject:
+			return "ErrorObject";
 		default:
 			return "Unknown Type";
 		}

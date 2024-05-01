@@ -13,6 +13,6 @@ namespace interp::object
 		std::shared_ptr<Object> value;
 
 		ObjectType type() const override;
-		std::string inspect() override;
+		std::string inspect() const override;
 	};
 }

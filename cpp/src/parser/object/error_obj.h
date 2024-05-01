@@ -4,13 +4,13 @@
 
 namespace interp::object
 {
-	class Integer : public Object
+	class ErrorObject : public Object
 	{
 	public:
-		Integer(int64_t value);
-		~Integer() = default;
+		ErrorObject(std::string message);
+		~ErrorObject() = default;
 
-		int64_t value;
+		std::string message;
 
 		ObjectType type() const override;
 		std::string inspect() const override;

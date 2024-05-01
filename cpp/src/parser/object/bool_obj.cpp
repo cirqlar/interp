@@ -12,7 +12,7 @@ namespace interp::object
 		return ObjectType::BooleanObject;
 	}
 
-	std::string BooleanObject::inspect()
+	std::string BooleanObject::inspect() const
 	{
 		return value ? "true" : "false";
 	}

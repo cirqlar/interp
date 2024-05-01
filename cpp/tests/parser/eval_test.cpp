@@ -8,6 +8,7 @@ std::shared_ptr<interp::object::Object> test_eval(std::string input);
 bool test_int_obj(const interp::object::Object* in_object, int64_t expected);
 bool test_bool_obj(const interp::object::Object* in_object, bool expected);
 bool test_null_obj(const interp::object::Object* in_object);
+bool test_error(const interp::object::Object* in_object, std::string expected);
 
 TEST(EvalTest, TestEvalIntegerExpression)
 {
@@ -134,6 +135,25 @@ TEST(EvalTest, TestIfElseExpressions)
 	}
 }
 
+TEST(EvalTest, TestErrorHandling)
+{
+	std::pair<std::string, std::string> expected[] = {
+		std::pair("5 + true;", "type mismatch: INTEGER + BOOLEAN"),
+		std::pair("5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"),
+		std::pair("-true", "unknown operator: -BOOLEAN"),
+		std::pair("true + false;", "unknown operator: BOOLEAN + BOOLEAN"),
+		std::pair("5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"),
+		std::pair("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
+		std::pair("if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"),
+	};
+
+	for (auto& tt : expected)
+	{
+		auto obj = test_eval(tt.first);
+		test_error(obj.get(), tt.second);
+	}
+}
+
 std::shared_ptr<interp::object::Object> test_eval(std::string input)
 {
 	interp::lexer::Lexer lex(input);
@@ -192,6 +212,34 @@ bool test_null_obj(const interp::object::Object* in_object)
 	else
 	{
 		EXPECT_TRUE(false) << "Object is not an Null, type is " << interp::object::object_type_to_string(in_object->type());
+		return false;
+	}
+}
+
+bool test_error(const interp::object::Object* in_object, std::string expected)
+{
+	if (auto obj = dynamic_cast<const interp::object::ErrorObject*>(in_object))
+	{
+		if (obj->message != expected)
+		{
+			EXPECT_TRUE(false)
+				<< "Got wrong error message. Expected: "
+				<< expected
+				<< " \nGot "
+				<< obj->message;
+			return false;
+		}
+
+		return true;
+	}
+	else
+	{
+		EXPECT_TRUE(false)
+			<< "Object is not an Error, got "
+			<< interp::object::object_type_to_string(in_object->type())
+			<< ": "
+			<< in_object->inspect();
+
 		return false;
 	}
 }

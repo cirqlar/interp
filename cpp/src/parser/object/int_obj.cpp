@@ -13,7 +13,7 @@ namespace interp::object
 		return ObjectType::IntegerObject;
 	}
 
-	std::string Integer::inspect()
+	std::string Integer::inspect() const
 	{
 		return std::to_string(this->value);
 	}
