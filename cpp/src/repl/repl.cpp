@@ -32,8 +32,10 @@ namespace interp::repl
 				input.clear();
 				continue;
 			}
+
+			auto env = interp::object::Environment::new_env(nullptr);
 			
-			auto evaluated = interp::eval::eval(prog.get());
+			auto evaluated = interp::eval::eval(prog, env);
 			if (evaluated)
 			{
 				std::cout << evaluated->inspect() << '\n';

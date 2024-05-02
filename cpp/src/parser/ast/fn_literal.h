@@ -16,7 +16,7 @@ namespace interp::ast
 
 		interp::token::Token token;
 		std::vector<std::shared_ptr<Identifier>> params;
-		std::shared_ptr<interp::ast::Expression> body;
+		std::shared_ptr<Expression> body;
 
 		std::string token_literal() override;
 		std::string string() override;

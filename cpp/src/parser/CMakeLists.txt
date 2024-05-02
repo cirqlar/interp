@@ -23,6 +23,8 @@ add_library(interp_parser STATIC
 	"object/bool_obj.cpp"
 	"object/null_obj.cpp"
 	"object/return_obj.cpp"
+	"object/environment.cpp"
+	"object/func_obj.cpp"
 	
 	"eval.cpp"
  )

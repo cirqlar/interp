@@ -157,6 +157,9 @@ namespace interp::parser
 		}
 		auto left_expr = this->prefix_parse_fns[this->current_token.type](this);
 
+		if (left_expr->type() == interp::ast::NodeType::BlockExpression)
+			return left_expr;
+
 		while (!this->peek_token_is(interp::token::SEMICOLON) && in_precidence < this->peek_precidence())
 		{
 			if (this->infix_parse_fns.find(this->peek_token.type) == this->infix_parse_fns.end())
@@ -275,16 +278,16 @@ namespace interp::parser
 			return nullptr;
 		}
 
-		auto if_lit = std::shared_ptr<interp::ast::FunctionLiteral>(
+		auto fn_lit = std::shared_ptr<interp::ast::FunctionLiteral>(
 			new interp::ast::FunctionLiteral(current_token)
 		);
-		p->parse_function_parameters(if_lit->params);
+		p->parse_function_parameters(fn_lit->params);
 
 		p->next_token();
 
-		if_lit->body = p->parse_expression(Precidence::LOWEST);
+		fn_lit->body = p->parse_expression(Precidence::LOWEST);
 		
-		return if_lit;
+		return fn_lit;
 	}
 
 	void Parser::parse_function_parameters(std::vector<std::shared_ptr<interp::ast::Identifier>>& out_params)

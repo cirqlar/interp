@@ -5,7 +5,7 @@
 #include "eval.h"
 
 std::shared_ptr<interp::object::Object> test_eval(std::string input);
-bool test_int_obj(const interp::object::Object* in_object, int64_t expected);
+bool test_int_obj(const interp::object::Object* in_object, int64_t expected, std::string input);
 bool test_bool_obj(const interp::object::Object* in_object, bool expected);
 bool test_null_obj(const interp::object::Object* in_object);
 bool test_error(const interp::object::Object* in_object, std::string expected);
@@ -34,12 +34,31 @@ TEST(EvalTest, TestEvalIntegerExpression)
 		std::pair("return 2 * 5; 9;", 10),
 		std::pair("9; return 2 * 5; 9;", 10),
 		std::pair("if (10 > 1) { if (10 > 1) { return 10; } return 1; }", 10),
+
+		std::pair("let a = 5; a;", 5),
+		std::pair("let a = 5 * 5; a;", 25),
+		std::pair("let a = 5; let b = a; b;", 5),
+		std::pair("let a = 5; let b = a; let c = a + b + 5; c;", 15),
+
+		std::pair("let identity = fn(x) { x; }; identity(5);", 5),
+		std::pair("let identity = fn(x) { return x; }; identity(5);", 5),
+		std::pair("let double = fn(x) { x * 2; }; double(5);", 10),
+		std::pair("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
+		std::pair("let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20),
+		std::pair("fn(x) { x; }(5)", 5),
+		std::pair(R"(
+let newAdder = fn(x) {
+	fn(y) { x + y };
+};
+let addTwo = newAdder(2);
+addTwo(2);
+		)", 4),
 	};
 
 	for (auto& tt : expected)
 	{
 		auto obj = test_eval(tt.first);
-		test_int_obj(obj.get(), tt.second);
+		test_int_obj(obj.get(), tt.second, tt.first);
 	}
 }
 
@@ -122,7 +141,7 @@ TEST(EvalTest, TestIfElseExpressions)
 		switch (tt.second->type())
 		{
 		case interp::object::ObjectType::IntegerObject:
-			test_int_obj(obj.get(), tt.second == FIVE_OBJ ? 5 : 15);
+			test_int_obj(obj.get(), tt.second == FIVE_OBJ ? 5 : 15, tt.first);
 			continue;
 		/*case interp::object::ObjectType::BooleanObject:
 			break;*/
@@ -145,6 +164,7 @@ TEST(EvalTest, TestErrorHandling)
 		std::pair("5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"),
 		std::pair("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
 		std::pair("if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"),
+		std::pair("foobar", "identifier not found: foobar"),
 	};
 
 	for (auto& tt : expected)
@@ -161,16 +181,17 @@ std::shared_ptr<interp::object::Object> test_eval(std::string input)
 
 	auto prog = parse.parse_program();
 
-	return interp::eval::eval(prog.get());
+	auto env = interp::object::Environment::new_env(nullptr);
+	return interp::eval::eval(prog, env);
 }
 
-bool test_int_obj(const interp::object::Object* in_object, int64_t expected)
+bool test_int_obj(const interp::object::Object* in_object, int64_t expected, std::string input)
 {
 	if (auto obj = dynamic_cast<const interp::object::Integer*>(in_object))
 	{
 		if (obj->value != expected)
 		{
-			EXPECT_TRUE(false) << "Integer has wrong value. Expected " << expected << " got " << obj->value;
+			EXPECT_TRUE(false) << "Integer has wrong value. Expected " << expected << " got " << obj->value << "\nFailed for: " << input;
 			return false;
 		}
 		else
@@ -178,7 +199,10 @@ bool test_int_obj(const interp::object::Object* in_object, int64_t expected)
 	}
 	else
 	{
-		EXPECT_TRUE(false) << "Object is not an Interger, type is " << interp::object::object_type_to_string(in_object->type());
+		EXPECT_TRUE(false) 
+			<< "Object is not an Interger, type is " 
+			<< interp::object::object_type_to_string(in_object->type())
+			<< "\nFailed for " << input;
 		return false;
 	}
 }
