@@ -6,9 +6,10 @@
 
 std::shared_ptr<interp::object::Object> test_eval(std::string input);
 bool test_int_obj(const interp::object::Object* in_object, int64_t expected, std::string input);
-bool test_bool_obj(const interp::object::Object* in_object, bool expected);
-bool test_null_obj(const interp::object::Object* in_object);
-bool test_error(const interp::object::Object* in_object, std::string expected);
+bool test_bool_obj(const interp::object::Object* in_object, bool expected, std::string input);
+bool test_string_obj(const interp::object::Object* in_object, std::string expected, std::string input);
+bool test_null_obj(const interp::object::Object* in_object, std::string input);
+bool test_error(const interp::object::Object* in_object, std::string expected, std::string input);
 
 TEST(EvalTest, TestEvalIntegerExpression)
 {
@@ -82,7 +83,21 @@ TEST(EvalTest, TestEvalBooleanExpression)
 	for (auto& tt : expected)
 	{
 		auto obj = test_eval(tt.first);
-		test_bool_obj(obj.get(), tt.second);
+		test_bool_obj(obj.get(), tt.second, tt.first);
+	}
+}
+
+TEST(EvalTest, TestEvalStringExpression)
+{
+	std::pair<std::string, std::string> expected[] = {
+		std::pair(R"("Hello World!")", "Hello World!"),
+		std::pair(R"("Hello " + "World!")", "Hello World!"),
+	};
+
+	for (auto& tt : expected)
+	{
+		auto obj = test_eval(tt.first);
+		test_string_obj(obj.get(), tt.second, tt.first);
 	}
 }
 
@@ -114,7 +129,7 @@ TEST(EvalTest, TestBangOperator)
 	for (auto& tt : expected)
 	{
 		auto obj = test_eval(tt.first);
-		test_bool_obj(obj.get(), tt.second);
+		test_bool_obj(obj.get(), tt.second, tt.first);
 	}
 }
 
@@ -146,7 +161,7 @@ TEST(EvalTest, TestIfElseExpressions)
 		/*case interp::object::ObjectType::BooleanObject:
 			break;*/
 		case interp::object::ObjectType::NullObject:
-			test_null_obj(obj.get());
+			test_null_obj(obj.get(), tt.first);
 			continue;
 		default:
 			continue;
@@ -165,12 +180,13 @@ TEST(EvalTest, TestErrorHandling)
 		std::pair("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
 		std::pair("if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"),
 		std::pair("foobar", "identifier not found: foobar"),
+		std::pair(R"("Hello " - "World!")", "unknown operator: STRING - STRING"),
 	};
 
 	for (auto& tt : expected)
 	{
 		auto obj = test_eval(tt.first);
-		test_error(obj.get(), tt.second);
+		test_error(obj.get(), tt.second, tt.first);
 	}
 }
 
@@ -207,13 +223,13 @@ bool test_int_obj(const interp::object::Object* in_object, int64_t expected, std
 	}
 }
 
-bool test_bool_obj(const interp::object::Object* in_object, bool expected)
+bool test_bool_obj(const interp::object::Object* in_object, bool expected, std::string input)
 {
 	if (auto obj = dynamic_cast<const interp::object::BooleanObject*>(in_object))
 	{
 		if (obj->value != expected)
 		{
-			EXPECT_TRUE(false) << "Integer has wrong value. Expected " << expected << " got " << obj->value;
+			EXPECT_TRUE(false) << "Integer has wrong value. Expected " << expected << " got " << obj->value << "\nFailed for: " << input;
 			return false;
 		}
 		else
@@ -221,13 +237,31 @@ bool test_bool_obj(const interp::object::Object* in_object, bool expected)
 	}
 	else
 	{
-		EXPECT_TRUE(false) << "Object is not an Boolean, type is " << interp::object::object_type_to_string(in_object->type());
+		EXPECT_TRUE(false) << "Object is not an Boolean, type is " << interp::object::object_type_to_string(in_object->type()) << "\nFailed for: " << input;
 		return false;
 	}
 }
 
+bool test_string_obj(const interp::object::Object* in_object, std::string expected, std::string input)
+{
+	if (auto obj = dynamic_cast<const interp::object::StringObject*>(in_object))
+	{
+		if (obj->value != expected)
+		{
+			EXPECT_TRUE(false) << "String has wrong value. Expected " << expected << " got " << obj->value << "\nFailed for: " << input;
+			return false;
+		}
+		else
+			return true;
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "Object is not an String, type is " << interp::object::object_type_to_string(in_object->type()) << "\nFailed for: " << input;
+		return false;
+	}
+}
 
-bool test_null_obj(const interp::object::Object* in_object)
+bool test_null_obj(const interp::object::Object* in_object, std::string input)
 {
 	if (auto obj = dynamic_cast<const interp::object::Null*>(in_object))
 	{
@@ -235,12 +269,12 @@ bool test_null_obj(const interp::object::Object* in_object)
 	}
 	else
 	{
-		EXPECT_TRUE(false) << "Object is not an Null, type is " << interp::object::object_type_to_string(in_object->type());
+		EXPECT_TRUE(false) << "Object is not an Null, type is " << interp::object::object_type_to_string(in_object->type()) << "\nFailed for: " << input;
 		return false;
 	}
 }
 
-bool test_error(const interp::object::Object* in_object, std::string expected)
+bool test_error(const interp::object::Object* in_object, std::string expected, std::string input)
 {
 	if (auto obj = dynamic_cast<const interp::object::ErrorObject*>(in_object))
 	{
@@ -250,7 +284,7 @@ bool test_error(const interp::object::Object* in_object, std::string expected)
 				<< "Got wrong error message. Expected: "
 				<< expected
 				<< " \nGot "
-				<< obj->message;
+				<< obj->message << "\nFailed for: " << input;
 			return false;
 		}
 
@@ -262,7 +296,7 @@ bool test_error(const interp::object::Object* in_object, std::string expected)
 			<< "Object is not an Error, got "
 			<< interp::object::object_type_to_string(in_object->type())
 			<< ": "
-			<< in_object->inspect();
+			<< in_object->inspect() << "\nFailed for: " << input;
 
 		return false;
 	}

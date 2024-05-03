@@ -51,7 +51,8 @@ namespace interp::token
 		FALSE = "FALSE",
 		IF = "IF",
 		ELSE = "ELSE",
-		RETURN = "RETURN";
+		RETURN = "RETURN",
+		STRING = "STRING";
 
 	TokenType lookup_ident(std::string literal);
 }

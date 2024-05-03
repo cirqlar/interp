@@ -23,6 +23,7 @@ namespace interp::parser
 
 		this->prefix_parse_fns[interp::token::IDENT] = this->parse_identifier;
 		this->prefix_parse_fns[interp::token::INT] = this->parse_integer_literal;
+		this->prefix_parse_fns[interp::token::STRING] = this->parse_string_literal;
 		this->prefix_parse_fns[interp::token::BANG] = this->parse_prefix_expression;
 		this->prefix_parse_fns[interp::token::MINUS] = this->parse_prefix_expression;
 		this->prefix_parse_fns[interp::token::TRUE] = this->parse_boolean;
@@ -193,6 +194,12 @@ namespace interp::parser
 			p->errors.push_back("could not parse " + p->current_token.literal + " as an integer");
 			return std::shared_ptr<interp::ast::IntegerLiteral>(nullptr);
 		}
+	}
+
+	std::shared_ptr<interp::ast::Expression> Parser::parse_string_literal(Parser* p)
+	{
+		return std::shared_ptr<interp::ast::StringLiteral>(
+			new interp::ast::StringLiteral(p->current_token, p->current_token.literal));
 	}
 
 	std::shared_ptr<interp::ast::Expression> Parser::parse_boolean(Parser *p)

@@ -8,3 +8,4 @@
 #include "object/int_obj.h"
 #include "object/null_obj.h"
 #include "object/return_obj.h"
+#include "object/string_obj.h"

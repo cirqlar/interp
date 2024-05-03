@@ -32,6 +32,8 @@ namespace interp::ast
 			return "PrefixExpression";
 		case interp::ast::NodeType::ReturnStatment:
 			return "ReturnStatment";
+		case interp::ast::NodeType::StringLiteral:
+			return "String";
 		default:
 			return "Unknown Type";
 		}

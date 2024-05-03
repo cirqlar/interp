@@ -14,6 +14,7 @@ namespace interp::eval
 	std::shared_ptr<interp::object::Object> eval_minus(std::shared_ptr<interp::object::Object>& right);
 	std::shared_ptr<interp::object::Object> eval_infix(std::string& op, std::shared_ptr<interp::object::Object>& left, std::shared_ptr<interp::object::Object>& right);
 	std::shared_ptr<interp::object::Object> eval_int_infix(std::string& op, std::shared_ptr<interp::object::Object>& left, std::shared_ptr<interp::object::Object>& right);
+	std::shared_ptr<interp::object::Object> eval_string_infix(std::string& op, std::shared_ptr<interp::object::Object>& left, std::shared_ptr<interp::object::Object>& right);
 	std::shared_ptr<interp::object::Object> eval_if(interp::ast::IfExpression* ifExpr, std::shared_ptr<interp::object::Environment>& env);
 	std::shared_ptr<interp::object::Object> apply_fn(std::shared_ptr<interp::object::Object> fn, std::vector<std::shared_ptr<interp::object::Object>>& args);
 	std::shared_ptr<interp::object::Environment> extend_fn_env(interp::object::FunctionObject* fn, std::vector<std::shared_ptr<interp::object::Object>>& args);

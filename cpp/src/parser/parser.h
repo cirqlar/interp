@@ -48,6 +48,7 @@ namespace interp::parser
 		std::shared_ptr<interp::ast::Expression> parse_expression(Precidence);
 		static std::shared_ptr<interp::ast::Expression> parse_identifier(Parser *);
 		static std::shared_ptr<interp::ast::Expression> parse_integer_literal(Parser *);
+		static std::shared_ptr<interp::ast::Expression> parse_string_literal(Parser* );
 		static std::shared_ptr<interp::ast::Expression> parse_boolean(Parser*);
 		static std::shared_ptr<interp::ast::Expression> parse_grouped_expression(Parser*);
 		static std::shared_ptr<interp::ast::Expression> parse_if_expression(Parser*);

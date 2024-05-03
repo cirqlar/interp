@@ -22,6 +22,8 @@ return false;
 10 != 9;
 <=
 >=
+"foobar"
+"foo bar"
 )";
 
 
@@ -101,6 +103,8 @@ return false;
 		std::pair(interp::token::SEMICOLON, ";"),
 		std::pair(interp::token::LESSTHANOREQUAL, "<="),
 		std::pair(interp::token::GREATERTHANOREQUAL, ">="),
+		std::pair(interp::token::STRING, "foobar"),
+		std::pair(interp::token::STRING, "foo bar"),
 		std::pair(interp::token::L_EOF, ""),
 	};
 

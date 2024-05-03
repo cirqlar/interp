@@ -12,6 +12,8 @@ namespace interp::repl
 	void start()
 	{
 
+		auto env = interp::object::Environment::new_env(nullptr);
+
 		while (true) {
 			std::string input;
 			std::cout << ">> ";
@@ -32,8 +34,6 @@ namespace interp::repl
 				input.clear();
 				continue;
 			}
-
-			auto env = interp::object::Environment::new_env(nullptr);
 			
 			auto evaluated = interp::eval::eval(prog, env);
 			if (evaluated)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "./ast/ast_string.h"
 #include "./ast/block.h"
 #include "./ast/bool.h"
 #include "./ast/call.h"

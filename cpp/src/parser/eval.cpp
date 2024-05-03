@@ -121,6 +121,13 @@ namespace interp::eval
 					new interp::object::ReturnObject( inner ));
 			}
 			return nullptr;
+		case interp::ast::NodeType::StringLiteral:
+			if (auto literal = dynamic_cast<interp::ast::StringLiteral*>(node.get()))
+			{
+				return std::shared_ptr<interp::object::StringObject>(
+					new interp::object::StringObject( literal->value ));
+			}
+			return nullptr;
 		default:
 			return nullptr;
 		}
@@ -220,13 +227,15 @@ namespace interp::eval
 
 	std::shared_ptr<interp::object::Object> eval_infix(std::string& op, std::shared_ptr<interp::object::Object>& left, std::shared_ptr<interp::object::Object>& right)
 	{
-		if (left->type() == right->type() && right->type() == interp::object::ObjectType::IntegerObject)
-			return eval_int_infix(op, left, right);
-		else if (left->type() != right->type())
+		if (left->type() != right->type())
 			return new_error("type mismatch: "
 				+ interp::object::object_type_to_string(left->type())
 				+ " " + op + " "
 				+ interp::object::object_type_to_string(right->type()));
+		else if (right->type() == interp::object::ObjectType::IntegerObject)
+			return eval_int_infix(op, left, right);
+		if (right->type() == interp::object::ObjectType::StringObject)
+			return eval_string_infix(op, left, right);
 		else if (op == "==")
 			return left == right ? TRUE : FALSE;
 		else if (op == "!=")
@@ -272,6 +281,28 @@ namespace interp::eval
 						+ interp::object::object_type_to_string(right_obj->type()));
 				
 				return std::shared_ptr<interp::object::Integer>(new interp::object::Integer(result));
+			}
+		}
+		
+		return new_error("unknown operator: "
+			+ interp::object::object_type_to_string(left->type())
+			+ " " + op + " "
+			+ interp::object::object_type_to_string(right->type()));
+	}
+	
+	std::shared_ptr<interp::object::Object> eval_string_infix(std::string& op, std::shared_ptr<interp::object::Object>& left, std::shared_ptr<interp::object::Object>& right)
+	{
+		if (auto right_obj = dynamic_cast<interp::object::StringObject*>(right.get()))
+		{
+			if (auto left_obj = dynamic_cast<interp::object::StringObject*>(left.get()))
+			{
+				if (op == "+")
+					return std::shared_ptr<interp::object::StringObject>(new interp::object::StringObject(left_obj->value + right_obj->value));
+				else
+					return new_error("unknown operator: "
+						+ interp::object::object_type_to_string(left_obj->type())
+						+ " " + op + " "
+						+ interp::object::object_type_to_string(right_obj->type()));
 			}
 		}
 		

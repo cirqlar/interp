@@ -18,6 +18,8 @@ namespace interp::object
 			return "ErrorObject";
 		case interp::object::ObjectType::FunctionObject:
 			return "FunctionObject";
+		case interp::object::ObjectType::StringObject:
+			return "STRING";
 		default:
 			return "Unknown Type";
 		}

@@ -16,6 +16,7 @@ add_library(interp_parser STATIC
 	"ast/program.cpp"
 	"ast/fn_literal.cpp"
 	"ast/call.cpp"
+	"ast/ast_string.cpp"
 
 	"object/base_obj.cpp"
 	"object/int_obj.cpp"
@@ -25,6 +26,7 @@ add_library(interp_parser STATIC
 	"object/return_obj.cpp"
 	"object/environment.cpp"
 	"object/func_obj.cpp"
+	"object/string_obj.cpp"
 	
 	"eval.cpp"
  )

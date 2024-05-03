@@ -19,6 +19,7 @@ namespace interp::ast
 		LetStatment,
 		PrefixExpression,
 		ReturnStatment,
+		StringLiteral,
 	};
 
 	std::string node_type_to_string(NodeType node_type);

@@ -107,6 +107,13 @@ namespace interp::lexer
 		case 0:
 			tok = {.type = interp::token::L_EOF, .literal = ""};
 			break;
+		case '"':
+		{
+			this->read_char();
+			std::string literal = this->read_until([](char ch) -> bool { return ch == '"'; });
+			tok = { .type = interp::token::STRING, .literal = literal };
+			break;
+		}
 		default:
 			if (isLetter(this->ch))
 			{
@@ -167,6 +174,16 @@ namespace interp::lexer
 	{
 		auto initial_position = this->position;
 		while (func(this->ch))
+		{
+			this->read_char();
+		}
+		return this->input.substr(initial_position, this->position - initial_position);
+	}
+
+	std::string Lexer::read_until(bool (*func)(char))
+	{
+		auto initial_position = this->position;
+		while (!func(this->ch) && this->ch != 0)
 		{
 			this->read_char();
 		}

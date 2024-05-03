@@ -127,6 +127,36 @@ TEST(ParserTest, TestIntegerLiteral)
 	}
 }
 
+TEST(ParserTest, TestStringLiteral)
+{
+	std::string input = "\"hello world\";";
+
+	interp::lexer::Lexer lex(input);
+	interp::parser::Parser parse(lex);
+
+	auto prog = parse.parse_program();
+	check_parser_errors(parse);
+
+	ASSERT_EQ(1, prog->statements.size())
+		<< "program.Statements does not contain 1 statements. got=" << std::to_string(prog->statements.size());
+
+	if (interp::ast::ExpressionStatement* expstmnt = dynamic_cast<interp::ast::ExpressionStatement*>(prog->statements[0].get()))
+	{
+		if (auto strLit = dynamic_cast<interp::ast::StringLiteral*>(expstmnt->expression.get()))
+		{
+			EXPECT_EQ("hello world", strLit->value) << "value not \"hello world\" got \"" << strLit->value << "\"";
+		}
+		else
+		{
+			EXPECT_TRUE(false) << "expression not StringLiteral";
+		}
+	}
+	else
+	{
+		EXPECT_TRUE(false) << "stmnt not ExpressionStatement";
+	}
+}
+
 TEST(ParserTest, TestBooleanExpression)
 {
 	std::string input = "true;";

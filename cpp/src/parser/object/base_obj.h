@@ -12,6 +12,7 @@ namespace interp::object
 		ReturnObject,
 		ErrorObject,
 		FunctionObject,
+		StringObject,
 	};
 
 	std::string object_type_to_string(ObjectType object_type);
