@@ -1,1 +1,1 @@
-SConscript('SCsub', variant_dir='build')
+SConscript('SCsub', variant_dir='build', duplicate=0)

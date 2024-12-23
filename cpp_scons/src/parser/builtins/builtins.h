@@ -5,8 +5,6 @@
 #include <string>
 
 #include "../object.h"
-#include "object/builtin_fn.h"
-#include "object/error_obj.h"
 
 namespace interp::eval
 {

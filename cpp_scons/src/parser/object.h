@@ -2,6 +2,7 @@
 
 #include "object/base_obj.h"
 #include "object/bool_obj.h"
+#include "object/builtin_fn.h"
 #include "object/environment.h"
 #include "object/error_obj.h"
 #include "object/func_obj.h"
