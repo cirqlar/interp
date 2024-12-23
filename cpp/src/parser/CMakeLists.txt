@@ -27,9 +27,11 @@ add_library(interp_parser STATIC
 	"object/environment.cpp"
 	"object/func_obj.cpp"
 	"object/string_obj.cpp"
+	"object/builtin_fn.cpp"
 	
 	"eval.cpp"
- )
+	"builtins/builtins.cpp"
+)
 target_include_directories(interp_parser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(interp_parser PUBLIC interp_lexer)
 

@@ -20,6 +20,8 @@ namespace interp::object
 			return "FunctionObject";
 		case interp::object::ObjectType::StringObject:
 			return "STRING";
+		case interp::object::ObjectType::BuiltinFnObject:
+			return "BuiltinFnObject";
 		default:
 			return "Unknown Type";
 		}
