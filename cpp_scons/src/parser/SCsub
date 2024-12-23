@@ -1,0 +1,38 @@
+Import('env')
+
+env_parser = env.Clone()
+
+env_parser.Prepend(CPPPATH=[".", "#"])
+lib = env_parser.StaticLibrary(target='interp_parser', source=Split("""
+	parser.cpp
+	ast/node.cpp
+	ast/block.cpp
+	ast/bool.cpp
+	ast/expr.cpp
+	ast/ident.cpp
+	ast/if.cpp
+	ast/infix.cpp
+	ast/int.cpp
+	ast/let.cpp
+	ast/prefix.cpp
+	ast/return.cpp
+	ast/program.cpp
+	ast/fn_literal.cpp
+	ast/call.cpp
+	ast/ast_string.cpp
+
+	object/base_obj.cpp
+	object/int_obj.cpp
+	object/error_obj.cpp
+	object/bool_obj.cpp
+	object/null_obj.cpp
+	object/return_obj.cpp
+	object/environment.cpp
+	object/func_obj.cpp
+	object/string_obj.cpp
+	object/builtin_fn.cpp
+	
+	eval.cpp
+	builtins/builtins.cpp
+"""))
+env.Prepend(LIBS=[lib])

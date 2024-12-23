@@ -1,0 +1,7 @@
+Import('env')
+
+env_repl = env.Clone()
+
+env_repl.Prepend(CPPPATH=[".", "#"])
+lib = env_repl.StaticLibrary(target='interp_repl', source="repl.cpp")
+env.Prepend(LIBS=[lib])
