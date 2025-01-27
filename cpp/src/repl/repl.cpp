@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
 
-#include "token.h"
-#include "lexer.h"
-#include "parser.h"
+#include "lexer/token.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
 #include "repl.h"
-#include "eval.h"
+#include "parser/eval.h"
 
 namespace interp::repl
 {
@@ -14,7 +14,8 @@ namespace interp::repl
 
 		auto env = interp::object::Environment::new_env(nullptr);
 
-		while (true) {
+		while (true)
+		{
 			std::string input;
 			std::cout << ">> ";
 			std::getline(std::cin, input);
@@ -27,14 +28,14 @@ namespace interp::repl
 
 			if (errors.size() > 0)
 			{
-				for (auto& error : parse.get_errors())
+				for (auto &error : parse.get_errors())
 				{
 					std::cout << '\t' << error << '\n';
 				}
 				input.clear();
 				continue;
 			}
-			
+
 			auto evaluated = interp::eval::eval(prog, env);
 			if (evaluated)
 			{

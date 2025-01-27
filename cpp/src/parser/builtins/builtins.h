@@ -4,15 +4,15 @@
 #include <map>
 #include <string>
 
-#include "object/builtin_fn.h"
-#include "object/error_obj.h"
+#include "object.h"
 
 namespace interp::eval
 {
-	std::map<std::string, interp::object::BuiltinFn> builtins({
+	std::map<std::string, interp::object::BuiltinFnObject> builtins({
 
 		// LEN
-		std::pair("len", [](std::vector<std::shared_ptr<interp::object::Object>> args) -> std::shared_ptr<interp::object::Object> {
+		std::pair("len", interp::object::BuiltinFnObject([](std::vector<std::shared_ptr<interp::object::Object>> args) -> std::shared_ptr<interp::object::Object>
+														 {
 			if (args.size() != 1)
 			{
 				return std::shared_ptr<interp::object::ErrorObject>(
@@ -30,7 +30,6 @@ namespace interp::eval
 			default:
 				return std::shared_ptr<interp::object::ErrorObject>(
 					new interp::object::ErrorObject("argument to `len` not supported, got=" + interp::object::object_type_to_string( args[0]->type() )));
-			}
-		}),
+			} })),
 	});
 }

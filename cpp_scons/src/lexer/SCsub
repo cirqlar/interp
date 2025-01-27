@@ -1,7 +1,0 @@
-Import('env')
-
-env_lexer = env.Clone()
-
-env_lexer.Prepend(CPPPATH=["."])
-lib = env_lexer.StaticLibrary(target='interp_lexer', source=Split('lexer.cpp token.cpp'))
-env.Prepend(LIBS=[lib])

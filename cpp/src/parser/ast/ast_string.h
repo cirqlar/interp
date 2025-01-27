@@ -1,7 +1,7 @@
 #pragma once
 
 #include "node.h"
-#include "token.h"
+#include "lexer/token.h"
 
 namespace interp::ast
 {
